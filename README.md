@@ -1,6 +1,17 @@
-# Themis
+<div align="center">
 
-A suite of state-of-the-art scalar code reward models trained on synthetically constructed preference data mined from real-world git commits.
+# Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring
+
+[![arXiv](https://img.shields.io/badge/arXiv-xxxx.xxxxx-b31b1b.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-Themis--RM-yellow)](https://huggingface.co/collections/project-themis/themis-reward-model-collection)
+[![Datasets & Benchmarks](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets%20%26%20Benchmarks-Themis-blue)](https://huggingface.co/collections/project-themis/themis-preference-datasets-and-benchmarks)
+
+</div>
+
+> **Abstract:**
+>
+> Reward models (RMs) have become an indispensable fixture of the language model (LM) post-training playbook, enabling policy alignment and test-time scaling. Research on the application of RMs in code generation, however, has been comparatively sparse, with existing work largely focusing on execution feedback. This choice constrains post-training to optimizing functional correctness over self-contained executable code. In this work, we examine the training and evaluation of multilingual, multi-criteria code RMs. To this end, we first compile Themis-CodeRewardBench, a benchmark to evaluate code RMs across five preference dimensions (i.e., criteria) and eight programming languages, on which we profile 50+ code, math, and general-purpose RMs. Observing the limited proficiency of current RMs beyond scoring for functional correctness, we develop Themis-CodePreference, the largest open-source collection of code preferences to date (more than 350k preference pairs), and use it to train Themis-RM, a suite of multilingual code reward models for flexible multi-criteria scoring, ranging in size from 600M to 32B parameters. Our experiments and ablations demonstrate positive scaling trends, strong cross-lingual transfer when training on diverse preferences, and the importance of multi-criteria training for reliable code reward modeling.
+>
 
 Themis reward models are trained using the Bradley-Terry preference framework with a multi-stage data pipeline that mines, filters, scores, and assembles high-quality code preference pairs from open-source repositories. The models are evaluated on Code RewardBench (CRB), a benchmark of 8,866 preference pairs spanning 5 quality aspects and 8 programming languages.
 
@@ -15,10 +26,10 @@ Themis/
 │   ├── Commit_Mining_Terms/  Aspect-specific term lists for commit classification
 │   └── Prompts/              Jinja2 templates, LLM judge driver, system prompt mapper
 │
-├── Training/           Distributed reward model training on AWS GPU clusters
+├── Training/           Distributed reward model training on multi-node GPU clusters
 │   ├── train_reward_model.py     Training script (FSDP2 + Liger fused kernels)
-│   ├── launch_reward_training.sh Per-node launch script (enroot + accelerate)
-│   ├── Themis.Dockerfile         Container build (PyTorch + EFA + NCCL)
+│   ├── launch_reward_training.sh Per-node launch script (container + accelerate)
+│   ├── Themis.Dockerfile         Container build (PyTorch + NCCL)
 │   └── fsdp2_config.yaml        Accelerate / FSDP2 configuration
 │
 └── Evaluation/         Benchmarking suite for 51 reward models on Code RewardBench
@@ -36,24 +47,24 @@ The end-to-end pipeline has three phases: dataset construction, model training, 
   BigQuery (github_repos)
       │
       ▼
-  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-  │ 1. Commit Mining     │──▶│ 2. Repo Filtering │──▶│ 3. Ext Filtering  │
-  │    (SQL)             │   │    (allowlists)   │   │    (lang → ext)   │
-  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+  ┌─────────────────────┐   ┌───────────────────┐   ┌──────────────────┐
+  │ 1. Commit Mining    │──▶│ 2. Repo Filtering │──▶│ 3. Ext Filtering │
+  │    (SQL)            │   │    (allowlists)   │   │    (lang → ext)  │
+  └─────────────────────┘   └───────────────────┘   └──────────────────┘
                                                             │
       ┌─────────────────────────────────────────────────────┘
       ▼
-  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-  │ 4. Content Retrieval │──▶│ 5. Deduplication  │──▶│ 6. Term Filtering  │
-  │    (git fetch)       │   │    (MinHash LSH)  │   │    (aspect terms)  │
-  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+  ┌──────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+  │ 4. Content Retrieval │──▶│ 5. Deduplication │──▶│ 6. Term Filtering│
+  │    (git fetch)       │   │    (MinHash LSH) │   │    (aspect terms)│
+  └──────────────────────┘   └──────────────────┘   └──────────────────┘
                                                             │
       ┌─────────────────────────────────────────────────────┘
       ▼
-  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-  │ 7. LLM Scoring &    │──▶│ 8. LLM-as-a-Judge│──▶│ 9. Training Data   │
-  │    Instruction Synth │   │    (A/B voting)   │   │    Assembly        │
-  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+  ┌──────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+  │ 7. LLM Scoring &     │-─▶│ 8. LLM-as-a-Judge│──▶│ 9. Training Data │
+  │    Instruction Synth │   │    (A/B voting)  │   │    Assembly      │
+  └──────────────────────┘   └──────────────────┘   └──────────────────┘
                                                             │
                           MODEL TRAINING                    │
                           ──────────────                    │
@@ -64,12 +75,12 @@ The end-to-end pipeline has three phases: dataset construction, model training, 
   │ (BT loss + LM regularisation + magnitude penalty, Liger kernels)  │
   └───────────────────────────────────┬───────────────────────────────┘
                                       │
-                          EVALUATION   │
-                          ──────────   │
-      ┌────────────────────────────────┘
+                          EVALUATION  │
+                          ──────────  │
+      ┌───────────────────────────────┘
       ▼
   ┌───────────────────────────────────────────────────────────────────┐
-  │ Code RewardBench: 8,866 pairs × 5 aspects × 8 languages          │
+  │ Code RewardBench: 8,866 pairs × 5 aspects × 8 languages           │
   │ Evaluated across scalar, MoE, and generative RM architectures     │
   └───────────────────────────────────────────────────────────────────┘
 ```
@@ -107,7 +118,7 @@ See **[Dataset/README.md](./Dataset/README.md)** for the full pipeline documenta
 
 ## Phase 2: Training
 
-Reward models are trained using the Bradley-Terry preference framework on AWS multi-node GPU clusters (p5/p4d instances with EFA networking). The training script supports FSDP2 distributed training, Liger fused Triton kernels for efficient linear cross-entropy computation, and an optional LM regularisation loss.
+Reward models are trained using the Bradley-Terry preference framework on multi-node GPU clusters. The training script supports FSDP2 distributed training, Liger fused Triton kernels for efficient linear cross-entropy computation, and an optional LM regularisation loss.
 
 See **[Training/README.md](./Training/README.md)** for the full training documentation, including container setup, cluster configuration, environment variables, FSDP2 config, all training arguments, launch commands, monitoring, checkpointing, and troubleshooting.
 
@@ -116,8 +127,8 @@ See **[Training/README.md](./Training/README.md)** for the full training documen
 | Component | Description |
 |---|---|
 | [`train_reward_model.py`](./Training/train_reward_model.py) | Training script: `RewardModelWithLMHead` backbone + reward head, `PairCollator`, BT + LM + magnitude loss |
-| [`launch_reward_training.sh`](./Training/launch_reward_training.sh) | Per-node launch script: enroot container with accelerate, CUDA/NCCL/EFA env vars |
-| [`Themis.Dockerfile`](./Training/Themis.Dockerfile) | Container build: PyTorch NGC base + EFA + GDRCopy + AWS-OFI-NCCL + Open MPI |
+| [`launch_reward_training.sh`](./Training/launch_reward_training.sh) | Per-node launch script: container runtime with accelerate and CUDA/NCCL env vars |
+| [`Themis.Dockerfile`](./Training/Themis.Dockerfile) | Container build: PyTorch NGC base + high-speed networking + Open MPI |
 | [`fsdp2_config.yaml`](./Training/fsdp2_config.yaml) | Accelerate / FSDP2 distributed training configuration |
 
 ## Phase 3: Evaluation
@@ -137,7 +148,7 @@ See **[Evaluation/README.md](./Evaluation/README.md)** for the full evaluation d
 
 ## Related Work
 
-**[AWS Distributed Training Tutorial](https://github.com/iNeil77/AWS_DistTraining_Tutorial)** — a companion tutorial by the same authors that walks through multi-node distributed training of scalar reward models on AWS. Covers cluster provisioning, EFA networking, enroot/pyxis container management, and FSDP-based training across p5/p4d instances. Useful as a standalone guide for anyone looking to reproduce the Themis training setup or adapt it to their own reward modelling workloads.
+**[Distributed Training Tutorial](https://github.com/iNeil77/AWS_DistTraining_Tutorial)** — A companion tutorial by the us that walks through multi-node distributed training of scalar reward models on cloud GPU clusters. Covers cluster provisioning, high-speed networking, container management, and FSDP-based training. Useful as a standalone guide for anyone looking to reproduce the Themis training setup or adapt it to their own reward modelling workloads. Follows a simplified recipe that leverages the Axolotl framework for training reward models with the Bradley-Terry loss.
 
 ## License
 

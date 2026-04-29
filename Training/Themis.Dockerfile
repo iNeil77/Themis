@@ -5,17 +5,17 @@
 #
 # Purpose:
 #   Builds a Docker image optimised for multi-node, multi-GPU reward model
-#   training on AWS p5 (H100) and p4d (A100) instances with EFA networking.
+#   training on H100/A100 clusters with high-speed networking.
 #
 # Base image:
 #   NVIDIA PyTorch NGC container (nvcr.io/nvidia/pytorch:26.04-py3) which
 #   includes PyTorch, CUDA toolkit, cuDNN, NCCL, and Triton.
 #
 # What this Dockerfile adds on top of the base:
-#   1. AWS Elastic Fabric Adapter (EFA) installer — kernel-bypass networking
-#      for NCCL all-reduce at 400+ Gbps between nodes.
+#   1. Elastic Fabric Adapter (EFA) installer — kernel-bypass networking
+#      for high-throughput NCCL all-reduce between nodes.
 #   2. NVIDIA GDRCopy — enables GPU-direct RDMA for lowest-latency NCCL
-#      transfers over EFA.
+#      transfers.
 #   3. AWS-OFI-NCCL plugin — bridges NCCL collective operations to the
 #      libfabric transport layer used by EFA.
 #   4. Open MPI — configured with EFA-compatible settings (disabling UCX/IB
@@ -42,8 +42,8 @@
 #
 # Usage with enroot:
 #   enroot import docker://ineil77/themis:29042026-3
-#   enroot create --name AWS_Themis ineil77+themis+29042026-3.sqsh
-#   enroot start --root --rw --mount ... AWS_Themis <command>
+#   enroot create --name Themis ineil77+themis+29042026-3.sqsh
+#   enroot start --root --rw --mount ... Themis <command>
 #
 # Architecture support:
 #   ARG TORCH_CUDA_ARCH_LIST covers: A100 (8.0), A6000 (8.6), L40/4090 (8.9),

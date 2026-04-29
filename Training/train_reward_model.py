@@ -534,7 +534,7 @@ def prepare_dataset(
     Args:
         num_proc: Number of CPU processes for parallel dataset map/filter
             operations. Defaults to 8. Using all available cores on large
-            machines (e.g. 192-core p5) can cause memory pressure and
+            machines (e.g. 192-core nodes) can cause memory pressure and
             contention with the training processes.
     """
     ds = load_dataset(dataset_name, split=dataset_split)
@@ -656,7 +656,7 @@ def parse_args():
     p.add_argument("--num_proc", type=int, default=8,
                     help="Number of CPU processes for dataset map/filter operations. "
                          "Defaults to 8. Avoid using all cores on large machines "
-                         "(e.g. 192-core p5) to prevent memory pressure.")
+                         "(e.g. 192-core nodes) to prevent memory pressure.")
     p.add_argument("--system_prompt", type=str, default=None,
                     help="Optional system prompt prepended to every conversation "
                          "via the tokenizer chat template")

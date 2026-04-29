@@ -129,8 +129,8 @@ BigQuery (github_repos)
 - Git CLI
 
 **Hardware (recommended):**
-- Content retrieval (Stage 4): high-core-count machine with fast network (64+ workers, each spawning 12 threads)
-- MinHash deduplication (Stage 5): single machine with ≥128 GB RAM for large datasets
+- Content retrieval (Stage 4): high-core-count machine with fast network
+- MinHash deduplication (Stage 5): single machine with large RAM (scales with dataset size and number of permutations)
 - LLM scoring (Stage 7): GPU instance for batch API or vLLM inference
 - Judge inference (Stage 8): multi-GPU node (tensor parallelism across available GPUs)
 
@@ -383,7 +383,7 @@ python minHash_dedupe_local.py \
 
 ### 7.4 Memory Considerations
 
-The clustering step loads all MinHash signatures and hash tables into memory. For datasets exceeding ~10M rows at 256 permutations, expect 64+ GB RAM usage. The script disables garbage collection during the cluster-assignment phase (`gc.freeze()` / `gc.disable()`) to avoid performance degradation from the large union-find structure.
+The clustering step loads all MinHash signatures and hash tables into memory. RAM usage scales with dataset size and number of permutations. The script disables garbage collection during the cluster-assignment phase (`gc.freeze()` / `gc.disable()`) to avoid performance degradation from the large union-find structure.
 
 ---
 

@@ -1,6 +1,6 @@
 # Reward Model Training Runbook
 
-End-to-end guide for training a Bradley-Terry scalar reward model on AWS multi-node GPU clusters (p5/p4d instances with EFA networking) using FSDP2, Liger fused kernels, and enroot containers.
+End-to-end guide for training a Bradley-Terry scalar reward model on multi-node GPU clusters using FSDP2, Liger fused kernels, and containerised environments.
 
 **Related files:**
 
@@ -8,8 +8,8 @@ End-to-end guide for training a Bradley-Terry scalar reward model on AWS multi-n
 |------|---------|
 | [`train_reward_model.py`](./train_reward_model.py) | Training script — model, loss (fused linear CE), data pipeline, training loop |
 | [`fsdp2_config.yaml`](./fsdp2_config.yaml) | Accelerate/FSDP2 distributed training configuration |
-| [`launch_reward_training.sh`](./launch_reward_training.sh) | Per-node launch script (enroot + accelerate) |
-| [`Themis.Dockerfile`](./Themis.Dockerfile) | Container build definition (PyTorch + EFA + Liger) |
+| [`launch_reward_training.sh`](./launch_reward_training.sh) | Per-node launch script (container runtime + accelerate) |
+| [`Themis.Dockerfile`](./Themis.Dockerfile) | Container build definition (PyTorch + high-speed networking + Liger) |
 
 ---
 
@@ -33,15 +33,15 @@ End-to-end guide for training a Bradley-Terry scalar reward model on AWS multi-n
 ## 1. Prerequisites
 
 **Hardware:**
-- AWS p5.48xlarge (8x H100 80GB) or p4d.24xlarge (8x A100 40/80GB)
-- EFA-enabled placement group (all nodes in the same AZ)
-- FSx for Lustre shared filesystem mounted at `/mnt/fsx/`
-- NVMe instance storage available at `/opt/dlami/nvme/`
+- Multi-GPU nodes with 8x H100 80GB or 8x A100 40/80GB per node
+- High-speed inter-node networking (e.g. InfiniBand, RoCE, or equivalent)
+- Shared filesystem mounted at `/mnt/fsx/` (or equivalent network storage)
+- NVMe instance storage available at `/opt/dlami/nvme/` (or equivalent local scratch)
 
-**Software (on host AMI):**
-- NVIDIA driver with EFA kernel module loaded
-- enroot installed (for container management)
-- Job scheduler: Slurm, AWS ParallelCluster, or manual SSH orchestration
+**Software (on host):**
+- NVIDIA driver with high-speed networking kernel module loaded
+- Container runtime (e.g. enroot, Docker, Singularity)
+- Job scheduler: Slurm or manual SSH orchestration
 
 **Accounts & Tokens:**
 - HuggingFace account with access to the base model (e.g. `Qwen/Qwen3-14B`)
@@ -51,7 +51,7 @@ End-to-end guide for training a Bradley-Terry scalar reward model on AWS multi-n
 
 ## 2. Container Setup
 
-The training environment is packaged as a Docker image containing PyTorch, CUDA, EFA drivers, NCCL, Liger Kernel, and all Python dependencies. See [`Themis.Dockerfile`](./Themis.Dockerfile) for the full build definition.
+The training environment is packaged as a Docker image containing PyTorch, CUDA, high-speed networking drivers, NCCL, Liger Kernel, and all Python dependencies. See [`Themis.Dockerfile`](./Themis.Dockerfile) for the full build definition.
 
 ### 2.1 Building the Image (Optional)
 
@@ -62,7 +62,7 @@ docker build -f Themis.Dockerfile -t ineil77/themis:29042026-3 .
 docker push ineil77/themis:29042026-3
 ```
 
-The Dockerfile uses a single-stage build: EFA, GDRCopy, and AWS-OFI-NCCL are all compiled in-place to ensure proper library linking (AWS-OFI-NCCL links against EFA's libfabric at compile time). Size is kept lean via debug symbol stripping, pip cache purging, and build-dependency removal.
+The Dockerfile uses a single-stage build: high-speed networking libraries (libfabric, GDRCopy, OFI-NCCL plugin) are all compiled in-place to ensure proper library linking. Size is kept lean via debug symbol stripping, pip cache purging, and build-dependency removal.
 
 ### 2.2 Importing into enroot
 
@@ -73,12 +73,12 @@ On each compute node (or on a shared filesystem visible to all nodes):
 enroot import docker://ineil77/themis:29042026-3
 ```
 
-This produces `ineil77+themis+29042026-3.sqsh` (~25-35 GB). If using a shared filesystem, import once and let all nodes access the same `.sqsh` file.
+This produces `ineil77+themis+29042026-3.sqsh`. If using a shared filesystem, import once and let all nodes access the same `.sqsh` file.
 
 ### 2.3 Creating the Container
 
 ```bash
-enroot create --name AWS_Themis ineil77+themis+29042026-3.sqsh
+enroot create --name Themis ineil77+themis+29042026-3.sqsh
 ```
 
 ### 2.4 Verification
@@ -86,10 +86,10 @@ enroot create --name AWS_Themis ineil77+themis+29042026-3.sqsh
 ```bash
 # Check the container exists
 enroot list
-# Expected output includes: AWS_Themis
+# Expected output includes: Themis
 
 # Quick sanity check — verify PyTorch sees GPUs
-enroot start --root AWS_Themis python3 -c "import torch; print(f'GPUs: {torch.cuda.device_count()}')"
+enroot start --root Themis python3 -c "import torch; print(f'GPUs: {torch.cuda.device_count()}')"
 # Expected: GPUs: 8
 ```
 
@@ -99,16 +99,16 @@ enroot start --root AWS_Themis python3 -c "import torch; print(f'GPUs: {torch.cu
 
 ### 3.1 Node Topology
 
-For an 8-node job on p5.48xlarge:
+For an 8-node job:
 - 64 GPUs total (8 per node)
-- Intra-node: NVLink (900 GB/s bisection bandwidth)
-- Inter-node: 4x EFA adapters (400 Gbps aggregate per node)
+- Intra-node: NVLink
+- Inter-node: high-speed RDMA networking
 
-### 3.2 Security Groups
+### 3.2 Network Configuration
 
-Ensure the security group allows:
-- All TCP/UDP traffic between nodes in the placement group (for NCCL)
-- EFA traffic (Security group must reference itself for all protocols)
+Ensure the network allows:
+- All TCP/UDP traffic between nodes in the cluster (for NCCL)
+- RDMA traffic between nodes (if using high-speed networking)
 
 ### 3.3 Shared Filesystem Layout
 
@@ -190,7 +190,7 @@ use_cpu: false
 | Field | Description | When to Change |
 |-------|-------------|----------------|
 | `num_machines` | Number of physical nodes | Always — must match your job allocation |
-| `num_processes` | Total GPUs = `num_machines` x GPUs/node | Always — 8 GPUs/node on p5/p4d |
+| `num_processes` | Total GPUs = `num_machines` x GPUs/node | Always — e.g. 8 GPUs/node on H100/A100 systems |
 | `fsdp_transformer_layer_cls_to_wrap` | The decoder layer class to shard | When switching model architectures (see [Section 10](#10-adapting-for-a-different-model)) |
 | `fsdp_reshard_after_forward` | `true` = ZeRO-3 (lower memory); `false` = ZeRO-2 (lower communication) | Set `false` if you have memory headroom and want faster throughput |
 | `fsdp_offload_params` | Offload sharded params to CPU RAM | Only for extremely large models that OOM even with full sharding |
@@ -356,7 +356,7 @@ enroot start --root \
     --env TORCH_NCCL_ASYNC_ERROR_HANDLING=1 \
     --env WANDB_API_KEY="${WANDB_API_KEY}" \
     --env WANDB_LOG_MODEL=false \
-    AWS_Themis accelerate launch \
+    Themis accelerate launch \
         --config_file "/mnt/fsx/Themis/v1.1/Standalone_Trainer/fsdp2_config.yaml" \
         --log_dir "/mnt/fsx/Themis/v1.1/27B/Logs/" \
         --machine_rank "${MACHINE_RANK}" \
@@ -394,13 +394,13 @@ enroot start --root \
             --seed 42
 ```
 
-### 7.2 enroot Flags Explained
+### 7.2 Container Runtime Flags Explained
 
 | Flag | Purpose |
 |------|---------|
 | `--root` | Run as root inside the container (required for GPU access and shared memory) |
 | `--rw` | Writable rootfs — needed for HuggingFace cache, temp files, NCCL shared state |
-| `--mount /mnt/fsx/:/mnt/fsx/` | Bind-mount FSx for Lustre (shared across all nodes for code, data, checkpoints) |
+| `--mount /mnt/fsx/:/mnt/fsx/` | Bind-mount the shared filesystem (shared across all nodes for code, data, checkpoints) |
 | `--mount /opt/dlami/nvme/shm/:/dev/shm/` | NVMe-backed `/dev/shm` for NCCL shared memory buffers. The default tmpfs is often too small for large allreduce operations. |
 
 ### 7.3 accelerate launch Flags
@@ -472,7 +472,7 @@ If the job hangs:
 1. Check that `NCCL_DEBUG=INFO` is set — the logs will show which collective is stuck
 2. Look for `NCCL WARN Timeout` in any rank's output
 3. Try increasing `NCCL_TIMEOUT` if it only happens during checkpointing (which gathers the full state dict)
-4. Verify EFA connectivity: `fi_info -p efa` inside the container should list EFA devices
+4. Verify high-speed networking connectivity: `fi_info -p efa` (or equivalent for your fabric) inside the container should list network devices
 
 ---
 
@@ -513,11 +513,7 @@ The current training script does not support mid-run resume. If a job fails:
 
 ### 9.4 Disk Space
 
-Checkpoint sizes scale with model parameters:
-- 8B model: ~16 GB per checkpoint (bf16 safetensors)
-- 27B model: ~54 GB per checkpoint
-
-With `--save_steps 50` on a 1000-step job, you'll produce ~20 checkpoints (~1 TB for 27B). Plan FSx capacity accordingly or increase `--save_steps`.
+Checkpoint sizes scale linearly with model parameters (bf16 safetensors: roughly 2 bytes per parameter). With frequent `--save_steps`, many checkpoints can accumulate. Plan shared filesystem capacity accordingly or increase `--save_steps`.
 
 ---
 
@@ -575,16 +571,9 @@ With `--save_steps 50` on a 1000-step job, you'll produce ~20 checkpoints (~1 TB
 
 5. **Verify Liger compatibility** — if the model architecture isn't in the table above, `AutoLigerKernelForCausalLM.from_pretrained()` will fail at startup with a clear error.
 
-### 10.2 Memory Budget (Rough Estimates)
+### 10.2 Memory Budget
 
-With FSDP2 (`reshard_after_forward=true`) + gradient checkpointing + bf16:
-
-| Model Size | GPU Memory per Device | Recommended Batch Size |
-|---|---|---|
-| 7-8B | ~25 GB | 4-8 |
-| 13-14B | ~40 GB | 2-4 |
-| 27-34B | ~65 GB | 2-4 |
-| 70B | ~75 GB (needs 80GB GPUs) | 1-2 |
+Per-device GPU memory depends on model size, FSDP sharding strategy, gradient checkpointing, and batch size. Start with a small `--per_device_train_batch_size` (1-2) and increase until GPU utilisation is satisfactory. Use `reshard_after_forward: true` (ZeRO-3) for tighter memory, or `false` (ZeRO-2) if you have headroom and want higher throughput.
 
 ---
 
@@ -669,8 +658,8 @@ print(f"Response 1: {r1:.4f}, Response 2: {r2:.4f}")
 ### Slow training (low GPU utilization)
 
 - Check `NCCL_DEBUG=INFO` logs for slow collectives (indicates network issues)
-- Ensure EFA is working: `fi_info -p efa` should list devices
-- Verify `/dev/shm` is NVMe-backed (not the default 64MB tmpfs)
+- Ensure high-speed networking is working: `fi_info -p efa` (or equivalent) should list devices
+- Verify `/dev/shm` is backed by fast storage (not the default 64MB tmpfs)
 - Consider `fsdp_reshard_after_forward: false` if you have memory headroom
 
 ### Checkpoint save is very slow

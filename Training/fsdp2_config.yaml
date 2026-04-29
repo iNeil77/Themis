@@ -93,7 +93,7 @@ fsdp_config:
 
 # ---- Cluster topology ----
 # num_machines: number of physical nodes in the training job
-# num_processes: total GPU count = num_machines × GPUs_per_node (8 for p5/p4d)
+# num_processes: total GPU count = num_machines × GPUs_per_node
 num_machines: 8
 num_processes: 64
 
@@ -101,7 +101,7 @@ num_processes: 64
 # c10d: PyTorch's native TCP-based rendezvous backend for process group init
 rdzv_backend: c10d
 
-# same_network: all nodes share a network (e.g. same VPC with EFA)
+# same_network: all nodes share a network (e.g. same subnet with RDMA)
 same_network: true
 
 # ---- Unused (TPU/CPU) ----

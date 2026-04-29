@@ -4,10 +4,10 @@
 # ==============================================================================
 #
 # Launches distributed reward model training inside an enroot container across
-# multiple GPUs on an AWS p5/p4d instance.
+# multiple GPUs on a multi-GPU node.
 #
 # Prerequisites:
-#   1. The enroot container "AWS_Themis" must already exist (see RUNBOOK.md for
+#   1. The enroot container "Themis" must already exist (see README.md for
 #      import/create instructions from ineil77/themis:29042026-3).
 #   2. Environment variables must be set (see "Required Environment" below).
 #   3. The shared filesystem (/mnt/fsx/) must be mounted and contain the
@@ -22,16 +22,16 @@
 #
 # Multi-node usage:
 #   This script must run on EVERY node in the cluster simultaneously, each
-#   with a unique MACHINE_RANK. Use your job scheduler (Slurm, AWS Batch, etc.)
+#   with a unique MACHINE_RANK. Use your job scheduler (Slurm, etc.)
 #   to orchestrate this.
 #
 # What this script does:
-#   1. Starts the AWS_Themis enroot container with root access and read-write rootfs
-#   2. Mounts the FSx shared filesystem and NVMe-backed /dev/shm for NCCL buffers
+#   1. Starts the Themis enroot container with root access and read-write rootfs
+#   2. Mounts the shared filesystem and NVMe-backed /dev/shm for NCCL buffers
 #   3. Passes all necessary environment variables (CUDA, NCCL, torch distributed)
 #   4. Inside the container: runs `accelerate launch` with the FSDP2 config,
 #      which spawns 8 training processes (one per GPU) that coordinate across nodes
-#   5. Training writes checkpoints and logs to the specified output directory on FSx
+#   5. Training writes checkpoints and logs to the specified output directory on the shared filesystem
 #
 # ==============================================================================
 
@@ -74,7 +74,7 @@ enroot start --root \
     --env TORCH_NCCL_ASYNC_ERROR_HANDLING=1 \
     \
     `# ---- Container name and accelerate launch command ----` \
-    AWS_Themis accelerate launch \
+    Themis accelerate launch \
         --config_file "/mnt/fsx/Themis/v1.1/Standalone_Trainer/fsdp2_config.yaml" \
         --log_dir "/mnt/fsx/Themis/v1.1/14B/Logs/" \
         --machine_rank "${MACHINE_RANK}" \
