@@ -88,7 +88,7 @@ BigQuery (github_repos)
             │
             ▼
 ┌───────────────────────────┐
-│ Stage 7: LLM Scoring &   │  templates/commit_review*.j2
+│ Stage 7: LLM Scoring &    │  templates/commit_review*.j2
 │ Instruction Synthesis     │  templates/inverse_instruction.j2
 │ (rate changes 1-5,        │  templates/bug_introduction.j2
 │  generate instructions)   │  templates/problem_recovery.j2

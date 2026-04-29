@@ -201,7 +201,7 @@ use_cpu: false
 ### 5.3 How FSDP2 Sharding Works
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────────────┐
 │ Layer N forward:                                                         │
 │   1. All-gather: collect parameter shards from all ranks → full params   │
 │   2. Compute: run forward pass for this layer                            │
@@ -213,7 +213,7 @@ use_cpu: false
 │   2. Compute: backward pass, produce gradients                           │
 │   3. Reduce-scatter: each rank gets its shard of the gradient            │
 │   4. Optimizer step: update local parameter shard                        │
-└─────────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 Each transformer layer is an independently-sharded FSDP unit, so peak memory is proportional to ~1 full layer + activations, not the entire model.

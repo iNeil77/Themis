@@ -33,12 +33,12 @@ Evaluation harness for benchmarking reward models on the Code RewardBench (CRB) 
 
 ```
                         Code RewardBench (CRB)
-                    ┌──────────────────────────┐
-                    │ 8,866 preference pairs    │
+                    ┌────────────────────────────┐
+                    │ 8,866 preference pairs     │
                     │ (prompt, chosen, rejected) │
-                    │ 5 aspects × 8 languages   │
+                    │ 5 aspects × 8 languages    │
                     │ 19 source subsets          │
-                    └────────────┬─────────────┘
+                    └────────────┬───────────────┘
                                  │
               ┌──────────────────┼──────────────────┐
               ▼                  ▼                   ▼
@@ -52,15 +52,15 @@ Evaluation harness for benchmarking reward models on the Code RewardBench (CRB) 
            │                  │                   │
            └──────────────────┼───────────────────┘
                               ▼
-                    ┌──────────────────┐
+                    ┌───────────────────┐
                     │ chosen > rejected │
                     │ → correct / wrong │
-                    └────────┬─────────┘
+                    └────────┬──────────┘
                              ▼
-                    ┌──────────────────┐
-                    │ results.json     │  accuracy by aspect / language / subset
-                    │ scores.parquet   │  per-sample scores and metadata
-                    └──────────────────┘
+                    ┌───────────────────┐
+                    │ results.json      │  accuracy by aspect / language / subset
+                    │ scores.parquet    │  per-sample scores and metadata
+                    └───────────────────┘
 ```
 
 Each script evaluates a reward model's ability to prefer the chosen response over the rejected response in each CRB sample. The model scores both responses independently; if `score(chosen) > score(rejected)`, the sample counts as correct.
