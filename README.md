@@ -85,16 +85,37 @@ The end-to-end pipeline has three phases: dataset construction, model training, 
   └───────────────────────────────────────────────────────────────────┘
 ```
 
-## Model Family
+## Results
 
-| Model | Parameters | CRB Accuracy |
-|---|---|---|
-| Themis-RM-0.6B | 0.6B | 79.4% |
-| Themis-RM-1.7B | 1.7B | 84.3% |
-| Themis-RM-4B | 4B | 88.4% |
-| Themis-RM-8B | 8B | 89.8% |
-| Themis-RM-14B | 14B | 91.2% |
-| Themis-RM-32B | 32B | 91.8% |
+Themis-RM models achieve best-in-class accuracy on [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench), a code-specific reward model benchmark, while also matching or exceeding much larger models on established general-domain benchmarks (RewardBench V1, RewardBench V2, JudgeBench). Models are grouped by parameter class; **bold** marks the best in each group.
+
+| Model | [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) | [RewardBench V1](https://huggingface.co/datasets/allenai/reward-bench) | [RewardBench V2](https://huggingface.co/datasets/allenai/reward-bench-v2) | [JudgeBench](https://huggingface.co/datasets/ScalerLab/JudgeBench) |
+|---|---|---|---|---|
+| | | | | |
+| **32B - 72B Class** | | | | |
+| [WorldPM-72B](https://huggingface.co/Qwen/WorldPM-72B-RLHFLow) | 76.96 | 90.88 | 67.92 | 55.21 |
+| [Athene-RM-70B](https://huggingface.co/Nexusflow/Athene-RM-70B) | 78.39 | 91.22 | 68.76 | 63.45 |
+| [Nemotron-70B-Reward](https://huggingface.co/nvidia/Llama-3.3-Nemotron-70B-Reward) | 81.19 | 93.88 | 70.49 | **73.47** |
+| **[Themis-RM-32B](https://huggingface.co/project-themis/Themis-RM-32B)** | **91.82** | **94.89** | **72.34** | 71.65 |
+| [AceCodeRM-32B](https://huggingface.co/TIGER-Lab/AceCodeRM-32B) | 62.95 | 23.58 | 67.98 | 66.77 |
+| | | | | |
+| **7B – 14B Class** | | | | |
+| **[Themis-RM-14B](https://huggingface.co/project-themis/Themis-RM-14B)** | **91.19** | 94.11 | 71.44 | **70.85** |
+| **[Themis-RM-8B](https://huggingface.co/project-themis/Themis-RM-8B)** | 89.78 | 93.69 | 65.87 | 69.97 |
+| [Athene-RM-8B](https://huggingface.co/Nexusflow/Athene-RM-8B) | 76.58 | 87.48 | 62.96 | 61.12 |
+| [CodeScaler-8B](https://huggingface.co/LARK-Lab/CodeScaler-8B) | 79.12 | 94.66 | 76.51 | 70.05 |
+| [Skywork-Reward-V2-8B](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-8B) | 79.97 | **94.76** | **76.93** | 67.90 |
+| [AceCodeRM-7B](https://huggingface.co/TIGER-Lab/AceCodeRM-7B) | 71.11 | 22.74 | 63.16 | 61.09 |
+| | | | | |
+| **0.6B - 4B Class** | | | | |
+| **[Themis-RM-4B](https://huggingface.co/project-themis/Themis-RM-4B)** | **88.39** | 92.46 | 63.81 | 68.02 |
+| [CodeScaler-4B](https://huggingface.co/LARK-Lab/CodeScaler-4B) | 77.97 | **94.32** | **75.13** | **68.44** |
+| [Skywork-Reward-V2-4B](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-4B) | 79.27 | 94.06 | 74.26 | 65.43 |
+| **[Themis-RM-1.7B](https://huggingface.co/project-themis/Themis-RM-1.7B)** | 83.04 | 89.17 | 56.22 | 63.29 |
+| [CodeScaler-1.7B](https://huggingface.co/LARK-Lab/CodeScaler-1.7B) | 73.75 | 91.13 | 68.44 | 66.17 |
+| [Skywork-Reward-V2-1.7B](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-1.7B) | 75.60 | 91.64 | 67.71 | 66.48 |
+| **[Themis-RM-0.6B](https://huggingface.co/project-themis/Themis-RM-0.6B)** | 79.26 | 83.41 | 49.61 | 63.84 |
+| [Skywork-Reward-V2-0.6B](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-0.6B) | 72.77 | 86.32 | 60.83 | 63.65 |
 
 ## Phase 1: Dataset Construction
 
