@@ -1,0 +1,120 @@
+{#
+  Commit Review + Instruction Generation
+  ───────────────────────────────────────
+  Two-phase prompt. Phase 1 reviews a single-file code change along a quality
+  axis and scores it 1-5 (same rubric as commit_review.j2 but without the
+  [FEEDBACK] section). Phase 2 generates a natural-language problem instruction
+  in a randomly-selected style that would lead a developer to produce either
+  the pre- or post-change code.
+
+  Template variables
+  ──────────────────
+    aspect        : str   – quality axis (e.g. "Security Hardness")
+    language      : str   – programming language
+    old_contents  : str   – file contents before the commit
+    new_contents  : str   – file contents after the commit
+    message       : str   – commit message / change description
+    diff          : str   – unified diff
+    problem_style : str   – one of "graduate course assignment",
+                            "quora question", "stackoverflow question",
+                            "google search query", "programming contest problem"
+
+  Produces: system + user message pair.
+#}
+{% block system %}
+You are an experienced Principal Software Engineer at a large tech company who is highly competent in writing, debugging, reviewing and refactoring code. When provided with code and corresponding instructions, you break it down into its constituent parts, explain what it does and hone in on the relevant sub-parts. You also work part-time as a problem-setter for a popular programming contest and coding interview preparation platform and are adept at crafting problems of varying difficulty levels and styles.
+{% endblock %}
+
+{% block user %}
+# Code Improvement: {{ aspect }}
+
+In light of your skills and past experience, you have been tasked with crafting problems for a company-wide programming contest. This year the contest has sought to introduce a new style of open ended challenge problems that are more reflective of real-world software engineering tasks. The idea is to have contestants improve the {{ aspect }} an existing code file or snippet via editing. So rather than the usual algorithmic or data structure problems where the problem structure is INSTRUCTION -> SOLUTION, the new style of problems will be structured as (INSTRUCTION, EXISTING_CODE) -> IMPROVED_CODE. The INSTRUCTION will provide an overview of the task without alluding to the expected code changes or axes of improvement. The EXISTING_CODE will be the starting point for the contestants to improve upon. The IMPROVED_CODE will be the final code snippet that the contestants will have to produce. The contestants will be judged on the quality of their code changes and the extent to which they improve the {{ aspect }} of the code.
+
+In the interest of scaling the problem creation process, the organizers have decided to base the contest problems on real-world internal code commits to the codebase of a critical service in production. These internal code commits have been flagged by the Senior Software Engineers in the organization as being representative in terms of improving the {{ aspect }} of the code. The organizers have provided you with a set of such code commits and have asked you to create problems based on them. The original code is enclosed within [EXISTING_CODE] and [/EXISTING_CODE] tags, and the new code is enclosed within [IMPROVED_CODE] and [/IMPROVED_CODE] tags. Additionally, a description of the intended changes are specified in natural language and enclosed within [CHANGES] and [/CHANGES] tags. The faithfulness of the change description as well as the flagging of the code commit as relevant to {{ aspect }} is not guaranteed and should be verified by you via careful examination of the code. Finally, a diff of the changes in the Unified Diff format is enclosed within [DIFF] and [/DIFF] tags for your reference.
+
+
+[EXISTING_CODE]
+
+```{{ language }}
+{{ old_contents }}
+```
+
+[/EXISTING_CODE]
+
+
+[IMPROVED_CODE]
+
+```{{ language }}
+{{ new_contents }}
+```
+
+[/IMPROVED_CODE]
+
+
+[CHANGES]
+
+{{ message }}
+
+[/CHANGES]
+
+
+[DIFF]
+
+{{ diff }}
+
+[/DIFF]
+
+
+Your task is hence two-phased. In the first phase, you must understand the pre-existing code and the changes made in the flagged commit and make a strict decision with a high bar on whether the changes do indeed improve the {{ aspect }} of the code. In the second phase, you must craft a problem INSTRUCTION that would sufficiently identifiably lead a mid-tier to experienced developer to converge on the EXISTING_CODE and the intended IMPROVED_CODE with equal ease. To this end, your review report should include the following:
+
+Phase 1: Understanding the Pre-existing Code and Changes
+
+Part A: A to the point description of what the pre-existing code does. You should break down the code into its constituent parts and explain what each part does. You should also explain the purpose of the code and how it may fit into the larger codebase. This description must be enclosed within [DESCRIPTION] and [/DESCRIPTION] tags as shown below:
+
+[DESCRIPTION]
+
+{{'{{'}}Your description goes here.{{'}}'}}
+
+[/DESCRIPTION]
+
+
+Part B: A factual summary of the specific functional and technical changes made by your colleague. You are free to use the provided file contents and the diff to support your summary, but ensure that you do not copy-paste your colleague's change description. This summary must be enclosed within [SUMMARY] and [/SUMMARY] tags as shown below:
+
+[SUMMARY]
+
+{{'{{'}}Your summary goes here.{{'}}'}}
+
+[/SUMMARY]
+
+
+Part C: You must summarize the specific functional and technical changes made by your colleague and score the quality of the code changes on a scale of 1 to 5 (inclusive) based on whether they improve the code along the axis under consideration and whether the changes are specific to {{ aspect }}. Scores should be assigned as follows:
+
+1. The code change does nothing to improve the code's {{ aspect }} in any way and likely (or even clearly) degrades its {{ aspect }} overall and is a clear regression. The change may or may not also contain unrelated edits that are not specific to {{ aspect }}. The change also potentially introduces other issues or bugs unrelated to {{ aspect }}.
+
+2. The code change is unnecessary and does not have any discernible effect on the code's {{ aspect }} but does not degrade its {{ aspect }} either. The change may or may not also contain unrelated edits that are not specific to {{ aspect }}.
+
+3. The code change makes the code slightly better with respect to {{ aspect }} but largely leaves it the same. The change might also contain some unnecessary edits which are unrelated to {{ aspect }} but the majority of the changes are specific to {{ aspect }}.
+
+4. The code change makes the code significantly better with respect to {{ aspect }}. There may very sparingly be some unnecessary edits which are unrelated to {{ aspect }} but the majority of the changes are specific to {{ aspect }}. The change does not introduce any new issues or bugs unrelated to {{ aspect }}.
+
+5. The code change greatly improves the code's {{ aspect }}, making it a must-have feature or addition. The change is also well implemented and specific, i.e., not a generic suggestion that could apply to any codebase. The incidence of unnecessary edits which are unrelated to {{ aspect }} is minimal or non-existent in the change. The change does not introduce any new issues or bugs unrelated to {{ aspect }}.
+
+Enclose your numerical score (and nothing else) within [RATING] and [/RATING] tags as shown below:
+
+[RATING]
+
+{{'{{'}}Your score goes here.{{'}}'}}
+
+[/RATING]
+
+
+Phase 2: Crafting the Problem INSTRUCTION
+
+You must craft a {{ problem_style }}-style problem INSTRUCTION that would sufficiently identifiably lead a mid-tier to experienced developer to converge on the EXISTING_CODE or the intended IMPROVED_CODE with equal probability. The INSTRUCTION should be clear, concise and should not allude to the expected code changes or axes of improvement. Make sure to not copy-paste the flagged commit's change description. The INSTRUCTION must be enclosed within [INSTRUCTION] and [/INSTRUCTION] tags as shown below:
+
+[INSTRUCTION]
+
+{{'{{'}}Your instruction goes here.{{'}}'}}
+
+[/INSTRUCTION]
+{% endblock %}

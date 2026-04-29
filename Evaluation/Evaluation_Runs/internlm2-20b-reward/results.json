@@ -1,0 +1,144 @@
+{
+  "overall": {
+    "accuracy": 0.7313,
+    "total_examples": 8862,
+    "correct_predictions": 6481,
+    "mean_score_difference": 0.2063,
+    "median_score_difference": 0.0857,
+    "std_score_difference": 0.4351
+  },
+  "by_aspect": {
+    "Functional_Correctness": {
+      "accuracy": 0.8138,
+      "count": 4775
+    },
+    "Memory_Efficiency": {
+      "accuracy": 0.6574,
+      "count": 289
+    },
+    "Readability_Maintainability": {
+      "accuracy": 0.6411,
+      "count": 1499
+    },
+    "Runtime_Efficiency": {
+      "accuracy": 0.602,
+      "count": 1309
+    },
+    "Security_Hardness": {
+      "accuracy": 0.6626,
+      "count": 990
+    }
+  },
+  "by_language": {
+    "C": {
+      "accuracy": 0.7745,
+      "count": 439
+    },
+    "CSharp": {
+      "accuracy": 0.7005,
+      "count": 187
+    },
+    "Cpp": {
+      "accuracy": 0.7429,
+      "count": 1470
+    },
+    "Go": {
+      "accuracy": 0.771,
+      "count": 725
+    },
+    "Java": {
+      "accuracy": 0.7894,
+      "count": 1467
+    },
+    "JavaScript": {
+      "accuracy": 0.7211,
+      "count": 1083
+    },
+    "Python": {
+      "accuracy": 0.6929,
+      "count": 2566
+    },
+    "Ruby": {
+      "accuracy": 0.6941,
+      "count": 925
+    }
+  },
+  "by_subset": {
+    "CODEPREFBENCH_SECURITY": {
+      "accuracy": 0.6763,
+      "count": 173
+    },
+    "COMMITPREFS_FUNCTIONAL": {
+      "accuracy": 0.6675,
+      "count": 824
+    },
+    "COMMITPREFS_MEMORY": {
+      "accuracy": 0.6587,
+      "count": 252
+    },
+    "COMMITPREFS_READABILITY": {
+      "accuracy": 0.6608,
+      "count": 1371
+    },
+    "COMMITPREFS_RUNTIME": {
+      "accuracy": 0.6975,
+      "count": 238
+    },
+    "COMMITPREFS_SECURITY": {
+      "accuracy": 0.6576,
+      "count": 768
+    },
+    "DEBUG_EVAL": {
+      "accuracy": 0.9447,
+      "count": 723
+    },
+    "ECCO": {
+      "accuracy": 0.5764,
+      "count": 399
+    },
+    "EVALPERF": {
+      "accuracy": 0.6415,
+      "count": 212
+    },
+    "HUMANEVAL_PACK": {
+      "accuracy": 0.9793,
+      "count": 627
+    },
+    "MBPP_PLUS_FIX_HARD": {
+      "accuracy": 0.3514,
+      "count": 37
+    },
+    "MDEVAL": {
+      "accuracy": 0.903,
+      "count": 134
+    },
+    "NOFUNEVAL_MAINTAIN": {
+      "accuracy": 0.4297,
+      "count": 128
+    },
+    "NOFUNEVAL_MEMORY": {
+      "accuracy": 0.6486,
+      "count": 37
+    },
+    "NOFUNEVAL_SECURITY": {
+      "accuracy": 0.6667,
+      "count": 27
+    },
+    "PIE_PERF": {
+      "accuracy": 0.5565,
+      "count": 460
+    },
+    "RUNBUGRUN": {
+      "accuracy": 0.784,
+      "count": 2430
+    },
+    "SECBENCH": {
+      "accuracy": 0.7857,
+      "count": 14
+    },
+    "VUL4J": {
+      "accuracy": 0.625,
+      "count": 8
+    }
+  }
+}

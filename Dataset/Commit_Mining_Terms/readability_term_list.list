@@ -1,0 +1,166 @@
+abstract
+adapter pattern
+anti-pattern
+antipattern
+appropriate nam
+big class
+big method
+break down
+break up
+builder pattern
+chain of respons
+circular dependency
+clarify
+clarity
+clean up
+cleanup
+code formatting
+code layout
+code path
+code quality
+code smell
+code style
+code uniformity
+codequal
+codestyle
+coding standards
+coding style
+cohesion
+cohesive
+command pattern
+complex condition
+consistent nam
+control coupling
+control dependency
+control flow
+convention
+cyclomatic
+data clump
+data coupling
+data dependency
+dead assignment
+dead class
+dead code
+dead function
+dead method
+dead parameter
+dead variable
+decouple
+deep nest
+deeply nest
+dependency inversion
+descriptive nam
+dry
+duplication
+empty block
+empty catch
+empty exception
+empty finally
+encapsulate
+encapsulation
+extendable
+extensibility
+extensible
+external coupling
+extract class
+extract constant
+extract interface
+extract method
+extract module
+extract package
+factor out
+factory method
+factory pattern
+feature envy
+fix comment
+fix nam
+god class
+god object
+guideline
+halstead
+hiding violation
+hot path
+inappropriate coupling
+inappropriate dependency
+inappropriate intimacy
+inconsistent comment
+inconsistent doc
+inconsistent format
+interface segregation
+intimacy violation
+large class
+large method
+large parameter list
+liskov substitution
+long class
+long method
+long parameter list
+maintainability
+maintainable
+message chain
+methid extract
+modernize
+modular
+normalize
+omitted break
+omitted case
+omitted default
+omitted else
+omitted error
+omitted exception
+omitted if
+omitted switch
+open/closed
+parrallel inheritance
+pep 8
+pep8
+portability
+primitive obsession
+readability
+readable
+reduce complexity
+reduce coupling
+reduce dependency
+reduce depth
+reduce nest
+refactor
+refused bequest
+remove goto
+remove hardcod
+remove irrelev
+remove magic
+remove obsol
+remove redun
+remove unnece
+remove unused
+remove useless
+rename
+restructure
+reuse
+sei cert
+separate
+separation
+shotgun surgery
+simplify
+single responsibility
+solid
+split function
+style guide
+tech debt
+technical debt
+temporary field
+test coverage
+testability
+testable
+unconditional branch
+unconditional control
+unconditional jump
+unconditional statement
+unused assignment
+unused class
+unused code
+unused function
+unused method
+unused parameter
+unused variable
+visitor pattern

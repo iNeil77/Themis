@@ -1,0 +1,60 @@
+{#
+  Inverse Instruction Synthesis
+  ─────────────────────────────
+  Given two code snippets (old and new file contents from a commit), the LLM
+  reverse-engineers a common explanation and a natural-language instruction
+  that would plausibly lead a developer to write either snippet.
+
+  No system prompt is used — user-only message.
+
+  Template variables
+  ──────────────────
+    language      : str   – programming language
+    old_contents  : str   – file contents before the commit
+    new_contents  : str   – file contents after the commit
+    problem_style : str   – one of "graduate course assignment",
+                            "quora question", "stackoverflow question",
+                            "google search query", "programming contest problem"
+
+  Produces: user message only (no system prompt).
+#}
+{% block user %}
+You are given two snippets in {{ language }} that solve a {{ problem_style }}. These are specified between the [EXAMPLE1] and [/EXAMPLE1] and the [EXAMPLE2] and [/EXAMPLE2] tags as illustrated below:
+
+
+[EXAMPLE1]
+
+```{{ language }}
+{{ old_contents }}
+```
+
+[/EXAMPLE1]
+
+
+[EXAMPLE2]
+
+```{{ language }}
+{{ new_contents }}
+```
+
+[/EXAMPLE2]
+
+
+While we are in possession of the resultant solution code snippets, the original problem/query has been stripped away. You are required to:
+
+Firstly, please provide a single common explanation as to what the provided code snippets accomplish in your own words and ensure that the explanation is enclosed between [EXPLAIN] and [/EXPLAIN] tags as illustrated below:
+
+[EXPLAIN]
+
+{{'{{'}}Explanation goes here{{'}}'}}
+
+[/EXPLAIN]
+
+Secondly, You must craft a {{ problem_style }}-style instruction that would sufficiently identifiably lead a mid-tier to experienced developer to converge on the code snippet provided. Make sure to not copy the original provided snippet into the instruction. Finally, provide the instruction you craft between [INSTRUCTION] and [/INSTRUCTION] tags as illustrated below:
+
+[INSTRUCTION]
+
+{{'{{'}}Instruction goes here{{'}}'}}
+
+[/INSTRUCTION]
+{% endblock %}

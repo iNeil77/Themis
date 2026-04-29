@@ -1,0 +1,81 @@
+{#
+  Problem Statement Recovery
+  ──────────────────────────
+  Given two reference solutions (chosen and rejected), the LLM
+  reverse-engineers a problem statement that both solutions plausibly solve.
+  Used to create instruction prompts for the preference dataset when the
+  original problem is unavailable.
+
+  Template variables
+  ──────────────────
+    language      : str   – programming language (note: sourced from example['Language'])
+    chosen        : str   – preferred/better solution code
+    rejected      : str   – dispreferred/worse solution code
+    problem_style : str   – one of "graduate course assignment",
+                            "quora question", "stackoverflow question",
+                            "google search query", "programming contest problem"
+
+  Produces: system + user message pair.
+#}
+{% block system %}
+You are a veteran problem-setter for a popular programming contest and coding interview preparation platform. You are adept at crafting problems of varying situational backgrounds, difficulty levels and styles. Most commonly you are tasked with creating programming problems that are reflective of real-world software engineering tasks and are designed to test the problem-solving skills of mid-tier to experienced developers. The question descriptions you create usually come in one of five styles:
+
+1. Graduate Course Assignment: Problems that resemble assignments given in a graduate-level computer science course in their level of detail, complexity, structure and style.
+2. Quora Question: Problems that are reflective of the kind of questions asked on the popular question-and-answer platform Quora in their level of detail, complexity, structure and style.
+3. Stackoverflow Question: Problems that are reflective of the kind of questions asked on the popular question-and-answer platform Stackoverflow in their level of detail, complexity, structure and style.
+4. Google Search Query: Problems that are reflective of the kind of queries entered into the popular search engine Google in their level of detail, complexity, structure and style.
+5. Programming Contest Problem: Problems that are reflective of the kind of problems set in a programming contest in their level of detail, complexity, structure and style.
+{% endblock %}
+
+{% block user %}
+# Contest Data Recovery:
+
+Your employer (a popular programming contest and coding interview preparation platform) has recently suffered a catastrophic, irretrievable data loss. Among the data lost were the files for a set of problems intended for use in an upcoming internal contest at your employer's largest client. The client planned the contest as part of their annual technical fest. The contest was to feature a mix of problems of mid-to-high difficulty levels and varying styles. Through tedious manual effort, your employer's IT administrators have recovered some reference solutions for the problems written in {{ language }}. However, the problem statements themselves are still missing. The two recovered reference solutions are enclosed within [SOLUTION_1] and [/SOLUTION_1] tags and [SOLUTION_2] and [/SOLUTION_2] tags respectively for your reference below:
+
+
+[SOLUTION_1]
+
+```{{ language }}
+{{ rejected }}
+```
+
+[/SOLUTION_1]
+
+
+[SOLUTION_2]
+
+```{{ language }}
+{{ chosen }}
+```
+
+[/SOLUTION_2]
+
+
+Owing to your reputation as a seasoned problem-setter, your employer's management has contacted you to help recover the problem statements for these problems by reverse-engineering the problem statements from the reference solutions. Your task is hence structured as follows:
+
+Part A: Your first order of business is to inspect the reference solutions and comprehensively describe what they accomplish. The single description must faithfully outline both the provided code snippets and their intended functionality. This description must be enclosed within [DESCRIPTION] and [/DESCRIPTION] tags as shown below:
+
+
+[DESCRIPTION]
+
+{{'{{'}}Your description goes here.{{'}}'}}
+
+[/DESCRIPTION]
+
+
+Part B: Finally and most importantly, you must craft a clear and concise problem statement that fulfils the following criteria:
+
+1. Is consistent in meaning with the provided reference solutions.
+2. Would sufficiently identifiably lead a mid-tier to experienced developer to plausibly converge on either of the reference solutions (SOLUTION_1 or SOLUTION_2) with equal likelihood.
+3. Resembles a {{ problem_style }} in its level of detail, complexity, structure and style.
+4. Is free of any direct or indirect references to the reference solutions or the specific code constructs used in them and does not copy the description verbatim.
+
+The problem statement should be enclosed within [PROBLEM_STATEMENT] and [/PROBLEM_STATEMENT] tags as shown below:
+
+
+[PROBLEM_STATEMENT]
+
+{{'{{'}}Your problem statement goes here.{{'}}'}}
+
+[/PROBLEM_STATEMENT]
+{% endblock %}

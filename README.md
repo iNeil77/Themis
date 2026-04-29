@@ -1,2 +1,144 @@
 # Themis
-A suite of state-of-the-art scalar code reward models
+
+A suite of state-of-the-art scalar code reward models trained on synthetically constructed preference data mined from real-world git commits.
+
+Themis reward models are trained using the Bradley-Terry preference framework with a multi-stage data pipeline that mines, filters, scores, and assembles high-quality code preference pairs from open-source repositories. The models are evaluated on Code RewardBench (CRB), a benchmark of 8,866 preference pairs spanning 5 quality aspects and 8 programming languages.
+
+## Repository Structure
+
+```
+Themis/
+├── Dataset/            Pipeline for constructing the preference training dataset
+│   ├── Commit_Mining_SQL/    BigQuery SQL for extracting single-file commits
+│   ├── Repos/                Curated per-language repository allowlists (~348k repos)
+│   ├── Utils/                Content retrieval, deduplication, and filtering tools
+│   ├── Commit_Mining_Terms/  Aspect-specific term lists for commit classification
+│   └── Prompts/              Jinja2 templates, LLM judge driver, system prompt mapper
+│
+├── Training/           Distributed reward model training on AWS GPU clusters
+│   ├── train_reward_model.py     Training script (FSDP2 + Liger fused kernels)
+│   ├── launch_reward_training.sh Per-node launch script (enroot + accelerate)
+│   ├── Themis.Dockerfile         Container build (PyTorch + EFA + NCCL)
+│   └── fsdp2_config.yaml        Accelerate / FSDP2 configuration
+│
+└── Evaluation/         Benchmarking suite for 51 reward models on Code RewardBench
+    ├── Evaluation_Scripts/   20 per-architecture evaluation scripts
+    └── Evaluation_Runs/      Pre-computed results (results.json + scores.parquet)
+```
+
+## Pipeline Overview
+
+The end-to-end pipeline has three phases: dataset construction, model training, and evaluation.
+
+```
+                          DATASET CONSTRUCTION
+                          ────────────────────
+  BigQuery (github_repos)
+      │
+      ▼
+  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+  │ 1. Commit Mining     │──▶│ 2. Repo Filtering │──▶│ 3. Ext Filtering  │
+  │    (SQL)             │   │    (allowlists)   │   │    (lang → ext)   │
+  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+                                                            │
+      ┌─────────────────────────────────────────────────────┘
+      ▼
+  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+  │ 4. Content Retrieval │──▶│ 5. Deduplication  │──▶│ 6. Term Filtering  │
+  │    (git fetch)       │   │    (MinHash LSH)  │   │    (aspect terms)  │
+  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+                                                            │
+      ┌─────────────────────────────────────────────────────┘
+      ▼
+  ┌─────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+  │ 7. LLM Scoring &    │──▶│ 8. LLM-as-a-Judge│──▶│ 9. Training Data   │
+  │    Instruction Synth │   │    (A/B voting)   │   │    Assembly        │
+  └─────────────────────┘   └──────────────────┘   └──────────────────┘
+                                                            │
+                          MODEL TRAINING                    │
+                          ──────────────                    │
+      ┌─────────────────────────────────────────────────────┘
+      ▼
+  ┌───────────────────────────────────────────────────────────────────┐
+  │ Bradley-Terry preference training with FSDP2 on multi-node GPUs   │
+  │ (BT loss + LM regularisation + magnitude penalty, Liger kernels)  │
+  └───────────────────────────────────┬───────────────────────────────┘
+                                      │
+                          EVALUATION   │
+                          ──────────   │
+      ┌────────────────────────────────┘
+      ▼
+  ┌───────────────────────────────────────────────────────────────────┐
+  │ Code RewardBench: 8,866 pairs × 5 aspects × 8 languages          │
+  │ Evaluated across scalar, MoE, and generative RM architectures     │
+  └───────────────────────────────────────────────────────────────────┘
+```
+
+## Model Family
+
+| Model | Parameters | CRB Accuracy |
+|---|---|---|
+| Themis-RM-0.6B | 0.6B | 79.4% |
+| Themis-RM-1.7B | 1.7B | 84.3% |
+| Themis-RM-4B | 4B | 88.4% |
+| Themis-RM-8B | 8B | 89.8% |
+| Themis-RM-14B | 14B | 91.2% |
+| Themis-RM-32B | 32B | 91.8% |
+
+## Phase 1: Dataset Construction
+
+The dataset pipeline mines single-file commits from GitHub's BigQuery public dataset, filters them through repository reputation and language allowlists, retrieves file contents via shallow git fetches, deduplicates with MinHash LSH, classifies commits by quality aspect using term matching, scores them with LLM judges, synthesises instructions, and assembles the final preference pairs with stochastic system prompts.
+
+**9 stages** covering BigQuery extraction, repository and extension filtering, content retrieval, deduplication, aspect-based term filtering, LLM scoring and instruction synthesis, LLM-as-a-judge preference labelling, and training data assembly.
+
+See **[Dataset/README.md](./Dataset/README.md)** for the full pipeline documentation, including per-stage scripts, arguments, invocation examples, and template reference.
+
+### Key Components
+
+| Component | Description |
+|---|---|
+| [`consolidated_query.sql`](./Dataset/Commit_Mining_SQL/consolidated_query.sql) | BigQuery SQL extracting single-file, licensed commits with non-trivial messages |
+| [`Repos/*.json`](./Dataset/Repos/) | Curated allowlists of ~348k high-reputation repos across 33 languages |
+| [`retrieve_commit_contents.py`](./Dataset/Utils/retrieve_commit_contents.py) | Multi-threaded shallow git fetch of pre/post commit file contents |
+| [`minHash_dedupe_local.py`](./Dataset/Utils/minHash_dedupe_local.py) | MinHash LSH deduplication adapted from BigCode |
+| [`Prompts/templates/*.j2`](./Dataset/Prompts/templates/) | 6 Jinja2 templates for LLM scoring, instruction synthesis, and judging |
+| [`gen_llm.py`](./Dataset/Prompts/gen_llm.py) | vLLM driver for multi-sample LLM-as-a-judge preference labelling |
+| [`system_prompt_mapper.py`](./Dataset/Prompts/system_prompt_mapper.py) | Stochastic system-prompt assignment for training data |
+
+## Phase 2: Training
+
+Reward models are trained using the Bradley-Terry preference framework on AWS multi-node GPU clusters (p5/p4d instances with EFA networking). The training script supports FSDP2 distributed training, Liger fused Triton kernels for efficient linear cross-entropy computation, and an optional LM regularisation loss.
+
+See **[Training/README.md](./Training/README.md)** for the full training documentation, including container setup, cluster configuration, environment variables, FSDP2 config, all training arguments, launch commands, monitoring, checkpointing, and troubleshooting.
+
+### Key Components
+
+| Component | Description |
+|---|---|
+| [`train_reward_model.py`](./Training/train_reward_model.py) | Training script: `RewardModelWithLMHead` backbone + reward head, `PairCollator`, BT + LM + magnitude loss |
+| [`launch_reward_training.sh`](./Training/launch_reward_training.sh) | Per-node launch script: enroot container with accelerate, CUDA/NCCL/EFA env vars |
+| [`Themis.Dockerfile`](./Training/Themis.Dockerfile) | Container build: PyTorch NGC base + EFA + GDRCopy + AWS-OFI-NCCL + Open MPI |
+| [`fsdp2_config.yaml`](./Training/fsdp2_config.yaml) | Accelerate / FSDP2 distributed training configuration |
+
+## Phase 3: Evaluation
+
+The evaluation suite benchmarks reward models on Code RewardBench (CRB) — 8,866 preference pairs across 5 quality aspects (Functional Correctness, Runtime Efficiency, Memory Efficiency, Security Hardness, Readability & Maintainability), 8 programming languages, and 19 source subsets. The suite supports 4 architecture categories across 20 scripts and includes pre-computed results for 51 models.
+
+See **[Evaluation/README.md](./Evaluation/README.md)** for the full evaluation documentation, including the benchmark dataset schema, evaluation protocol, per-script invocation examples, output format, and the complete results table.
+
+### Architecture Categories
+
+| Category | Scripts | Description |
+|---|---|---|
+| Standard scalar | `coderewardbench-seqcls.py` | `AutoModelForSequenceClassification` — works for most HuggingFace RMs |
+| Custom scalar | 13 scripts (armo, qrm, athene, inform, acecode, ldl, grm, internlm, nemotron, starling, eurus, ultra, automodel) | Custom model classes with MoE gating, value heads, quantile regression, etc. |
+| Generative | 4 scripts (cerm, nemotron-genrm, lmunit, r3) | vLLM-based text generation with score parsing |
+| Reranking | `rerank_eval.py` | Reward variance, Hits@K, and Spearman correlation on code completions |
+
+## Related Work
+
+**[AWS Distributed Training Tutorial](https://github.com/iNeil77/AWS_DistTraining_Tutorial)** — a companion tutorial by the same authors that walks through multi-node distributed training of scalar reward models on AWS. Covers cluster provisioning, EFA networking, enroot/pyxis container management, and FSDP-based training across p5/p4d instances. Useful as a standalone guide for anyone looking to reproduce the Themis training setup or adapt it to their own reward modelling workloads.
+
+## License
+
+Apache 2.0 — see [LICENSE](./LICENSE).

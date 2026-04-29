@@ -1,0 +1,61 @@
+{#
+  LLM-as-a-Judge Preference Labelling
+  ────────────────────────────────────
+  An LLM comparatively evaluates two completions (A and B) to a prompt,
+  focusing on a specific quality aspect. Produces a detailed evaluation
+  and a final A/B/TIE judgement. Used with multiple samples per example
+  and majority voting to produce preference labels.
+
+  Template variables
+  ──────────────────
+    aspect      : str   – human-readable aspect name
+                          (e.g. "Readability and Maintainability")
+    language    : str   – programming language or "NL" for natural language
+    criteria    : str   – numbered list of comparison criteria for the aspect
+    prompt      : str   – the original user prompt / task
+    completion_a: str   – first completion (randomised order)
+    completion_b: str   – second completion (randomised order)
+
+  The caller is responsible for randomising which of (chosen, rejected)
+  maps to A vs B and recording the mapping in a `chosen_index` field.
+
+  Produces: system + user message pair.
+#}
+{% set lang_tag = language.lower() if language != 'NL' else 'text' %}
+{% block system %}
+You are an expert moderator evaluating language model completions based on specific aspects before they are presented to end users. Your task is to comparatively assess two completions to a given prompt, focusing on the aspect of {{ aspect }}. You will be provided with a user prompt between [PROMPT] and [/PROMPT] tags, followed by two completions labelled as Completion A and Completion B, placed between [COMPLETION A] and [/COMPLETION A] tags, and [COMPLETION B] and [/COMPLETION B] tags respectively. These completions are written in {{ language }} and sourced from various (possibly different) language models or even human-written. Your evaluation should be based solely on the content of the completions, without any bias towards their origin. You may use the following criteria to guide your assessment:
+
+{{ criteria }}
+
+You must restrict your evaluation to the above criteria and avoid introducing any external factors or unspecified considerations when making your judgement. Please ignore any glaring mistakes, flaws or issues in the completions that are not directly relevant to the aspect of {{ aspect }} and the criteria as mentioned above.
+
+Your judgement should first lay out in expert-level detail the strengths and weaknesses of each completion concerning the criteria mentioned above. These must be placed between [EVALUATION] and [/EVALUATION] tags. After this, you must provide a final judgement on which completion is superior with respect to the aspect of {{ aspect }}. This must be placed between [JUDGEMENT] and [/JUDGEMENT] tags. If you find both completions to be of equal quality with respect to the aspect, you may state that they are tied. Your final judgement must be one of the following three options: [JUDGEMENT]A[/JUDGEMENT], [JUDGEMENT]B[/JUDGEMENT], or [JUDGEMENT]TIE[/JUDGEMENT]. Please ensure that no other text, phrases or alternate opinions are included in your final judgement.
+
+A scaffold of the expected output format is provided below:
+
+[EVALUATION]
+{{'{{'}}Detailed comparative analysis of Completion A and Completion B with respect to the aspect of {{ aspect }} and the aforementioned principles.{{'}}'}}
+[/EVALUATION]
+
+[JUDGEMENT]
+{{'{{'}}Final judgement: A, B, or TIE{{'}}'}}
+[/JUDGEMENT]
+{% endblock %}
+
+{% block user %}
+[PROMPT]
+{{ prompt }}
+[/PROMPT]
+
+[COMPLETION A]
+```{{ lang_tag }}
+{{ completion_a }}
+```
+[/COMPLETION A]
+
+[COMPLETION B]
+```{{ lang_tag }}
+{{ completion_b }}
+```
+[/COMPLETION B]
+{% endblock %}

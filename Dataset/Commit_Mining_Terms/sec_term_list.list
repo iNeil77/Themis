@@ -1,0 +1,271 @@
+access control
+android injection
+auth bypass
+auth forgery
+authorization bypass
+avoid directory traversal
+avoid dos attack
+avoid file inclusion
+avoid format string vulnerability
+avoid overflow
+avoid vuln
+avoid weak encryption
+avoid weak hashing
+birthday attack
+bound check
+broken auth
+buffer overflow
+buffer overread
+check bound
+check integrity
+clear text cookie
+clear text cred
+clear text pass
+clear text secret
+clear text sess
+clear-text cookie
+clear-text cred
+clear-text pass
+clear-text secret
+clear-text sess
+cmd injection
+code injection
+collision attack
+collision resist
+command injection
+credential expo
+critical fix
+critical patch
+critical vuln
+cross path injection
+cross site scripting
+cross-path injection
+cross-site scripting
+csrf
+cve
+cwe
+data forgery
+data injection
+data leakage
+data validation
+denial of service
+depracated hash
+deprecate cipher
+deprecate encryption
+deprecate vuln
+deprecated crypto
+dns prefetch
+double dealloc
+double free
+double-free
+dynamic rege
+dynamic require
+enhance safety
+eval injection
+explott
+expression injection
+file injection
+fix deseriali
+fix entropy
+fix hash
+fix key entropy
+fix key length
+fix key randomness
+fix key size
+fix key strength
+fix overflow
+fix randomness
+fix safety
+fix sensitive
+fix seriali
+fix snyk
+fix vuln
+fix weak cipher
+fix weak encryption
+fix weak hash
+fixed entropy
+fixed nonce
+fixed prng
+fixed random
+fixed seed
+fixed-random
+fortify
+fragment injection
+harc-coded secret
+hard-coded key
+hard-coded password
+hard-coded token
+hardcoded key
+hardcoded password
+hardcoded secret
+hardcoded token
+harden
+header injection
+heap corrupt
+heap overflow
+http response split
+imap injection
+improper authentication
+improper authorization
+improper validation
+improve entropy
+improve key entropy
+improve key length
+improve key randomness
+improve key size
+improve key strength
+improve randomness
+improve safety
+input validation
+insufficient entropy
+insufficient key entropy
+insufficient key length
+insufficient key randomness
+insufficient key size
+insufficient key strength
+insufficient randomness
+integrity check
+integrity validation
+interpolated rege
+interpolated require
+ldap injection
+log injection
+meet-in-the-middle attack
+mem align
+memory abuse
+memory alignment
+memory corrup
+memory misuse
+module injection
+non-consistent rege
+non-consistent require
+non-constant rege
+non-constant require
+nvd
+open redirect
+origin validat
+patch secret
+patch weak cipher
+path traversal
+periodic random
+permission bypass
+permission escalation
+permission exploit
+permission injection
+permission override
+permission poisoning
+plaintext cookie
+plaintext cred
+plaintext pass
+plaintext secret
+plaintext sess
+pointer abuse
+pointer misma
+pointer misuse
+pre-image attack
+preimage attack
+preimage resist
+privilege elevation
+privilege escalation
+privilege exploit
+random byte
+random-byte
+rce
+remote code execution
+remote command execution
+remote shell execution
+remove deprecated cipher
+remove deprecated encryption
+remove deprecated hash
+remove overflow
+remove secret
+remove vuln
+remove weak cipher
+remove weak encryption
+remove weak hash
+request forgery
+request hijacking
+request poisoning
+request validation
+resolve coverity
+resolve overflow
+resolve snyk
+resolve sonarqube
+safe allocation
+safe buffer
+safe copy
+safe dealloc
+safe dereference
+safe deseriali
+safe eval
+safe free
+safe library
+safe memory
+safe string
+sanitiz
+secure
+security
+sess fix
+sess hijack
+sess poison
+sess repla
+session fixation
+session hijacking
+session poisoning
+session replay
+shell injection
+signal error
+signal exploit
+signal injection
+smtp injection
+sql injection
+sqli
+stack corrupt
+stack unwind
+timing attack
+type confusion
+type forgery
+type injection
+type safety
+type validation
+type verification
+type vulnerability
+uaf
+unauthori
+unsafe
+unsalted hash
+untrusted content
+untrusted data
+untrusted deseriali
+untrusted host
+untrusted input
+untrusted origin
+untrusted user
+unverified data
+unverified host
+unverified input
+unverified origin
+unverified user
+update hash
+upgrade hash
+use after dealloc
+use after free
+use-after-free
+validate auth
+validate data
+validate input
+variable injection
+variable rege
+variable require
+vuln fix
+vuln patch
+vulnerability fix
+vulnerability patch
+xml external entit
+xml injection
+xpath injection
+xquery injection
+xss
+xxe
+zero day
+zero-day

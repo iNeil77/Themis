@@ -1,0 +1,112 @@
+# ==============================================================================
+# HuggingFace Accelerate Configuration — FSDP2 Multi-Node Training
+# ==============================================================================
+#
+# This YAML is passed to `accelerate launch --config_file` and controls the
+# distributed training strategy. It uses Fully Sharded Data Parallel v2 (FSDP2)
+# to shard model parameters, gradients, and optimizer states across all GPUs.
+#
+# FSDP2 is preferred over FSDP1 for:
+#   - Simpler per-parameter sharding (no FlatParameter flattening)
+#   - Better composability with torch.compile and activation checkpointing
+#   - Native DTensor-based implementation in PyTorch 2.x
+#
+# Usage:
+#   accelerate launch --config_file fsdp2_config.yaml train_reward_model.py [args...]
+#
+# Adapting for different setups:
+#   - Change num_machines / num_processes for different cluster sizes
+#   - Change fsdp_transformer_layer_cls_to_wrap for different model architectures
+#   - Set fsdp_offload_params: true for CPU offload (fits larger models, slower)
+#   - Set fsdp_reshard_after_forward: false for ZeRO-2 style (less communication,
+#     more memory)
+# ==============================================================================
+
+# ---- General ----
+# LOCAL_MACHINE means Accelerate manages the distributed launch locally (not SageMaker/TPU)
+compute_environment: LOCAL_MACHINE
+debug: false
+
+# ---- Distribution strategy ----
+# FSDP = Fully Sharded Data Parallel (PyTorch native)
+distributed_type: FSDP
+
+# ---- Precision ----
+# bf16 mixed precision: forward/backward in bf16, master weights in fp32
+# downcast_bf16: 'no' means we don't downcast fp32 tensors to bf16 after the optimizer step
+downcast_bf16: 'no'
+mixed_precision: bf16
+
+# ---- CPU affinity ----
+# When true, pins each process to a specific CPU socket for NUMA-optimal memory access.
+# Disabled here as the container environment handles affinity via CUDA_VISIBLE_DEVICES.
+enable_cpu_affinity: false
+
+# ---- FSDP-specific configuration ----
+fsdp_config:
+  # Use FSDP2 (DTensor-based) instead of legacy FSDP1 (FlatParameter-based)
+  fsdp_version: 2
+
+  # TRANSFORMER_BASED_WRAP: wraps each transformer decoder layer as an
+  # independently-sharded FSDP unit. This means parameters are gathered
+  # one layer at a time during forward, keeping peak memory proportional
+  # to a single layer rather than the full model.
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+
+  # The module class name to wrap. Must match the model architecture exactly.
+  # See RUNBOOK.md Section 10 for the full table. Common values:
+  #   - LlamaDecoderLayer (Llama 2/3/3.1/3.2)
+  #   - MistralDecoderLayer (Mistral)
+  #   - MixtralDecoderLayer (Mixtral)
+  #   - Qwen2DecoderLayer (Qwen 2/2.5/QwQ)
+  #   - Qwen3DecoderLayer (Qwen 3)
+  #   - Qwen3MoeDecoderLayer (Qwen 3 MoE)
+  #   - Qwen3_5DecoderLayer (Qwen 3.5)
+  #   - Gemma2DecoderLayer (Gemma 2)
+  #   - Phi3DecoderLayer (Phi-3/3.5)
+  fsdp_transformer_layer_cls_to_wrap: Qwen3DecoderLayer
+
+  # When false, loads model weights directly to GPU (faster but requires
+  # enough GPU memory to hold the full unsharded model temporarily during init).
+  # Set true if the model is too large to fit unsharded on a single GPU.
+  fsdp_cpu_ram_efficient_loading: false
+
+  # CPU offload: moves parameters to CPU when not in use. Dramatically reduces
+  # GPU memory at the cost of PCIe bandwidth. Only needed for very large models
+  # that can't fit even with sharding.
+  fsdp_offload_params: true
+
+  # Limit all-gathers: prevents multiple layers' parameter all-gathers from
+  # queuing simultaneously during backward, reducing peak memory.
+  fsdp_limit_all_gathers: true
+
+  # Reshard after forward: when true (ZeRO-3 style), parameters are freed from
+  # GPU memory after the forward pass of each layer and re-gathered for backward.
+  # When false (ZeRO-2 style), parameters stay gathered — uses more memory but
+  # avoids the second all-gather during backward.
+  fsdp_reshard_after_forward: true
+
+  # FULL_STATE_DICT: gathers the complete unsharded state dict to rank 0 for
+  # checkpointing. Alternatives: SHARDED_STATE_DICT (saves per-rank shards,
+  # faster but requires same world size to resume).
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+
+# ---- Cluster topology ----
+# num_machines: number of physical nodes in the training job
+# num_processes: total GPU count = num_machines × GPUs_per_node (8 for p5/p4d)
+num_machines: 8
+num_processes: 64
+
+# ---- Rendezvous ----
+# c10d: PyTorch's native TCP-based rendezvous backend for process group init
+rdzv_backend: c10d
+
+# same_network: all nodes share a network (e.g. same VPC with EFA)
+same_network: true
+
+# ---- Unused (TPU/CPU) ----
+main_training_function: main
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false

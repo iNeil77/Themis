@@ -1,0 +1,80 @@
+{#
+  Bug Introduction
+  ────────────────
+  Given a validated (instruction, reference solution) pair, the LLM generates
+  a functionally buggy variant of the reference solution. Used to create
+  (buggy, correct) preference pairs for functional correctness training.
+
+  Constraints enforced in the prompt:
+    - Only functional, logical, and algorithmic bugs
+    - Surface-level code structure must be preserved
+    - No allusion to bugs in identifiers or comments
+    - No security vulnerabilities, memory leaks, or non-functional bugs
+
+  Template variables
+  ──────────────────
+    language    : str   – programming language
+    instruction : str   – the problem statement / task description
+    solution    : str   – the correct reference solution code
+
+  Produces: system + user message pair.
+#}
+{% block system %}
+You are an experienced {{ language }} developer who also works part-time at a contest and interview preparation platform.
+{% endblock %}
+
+{% block user %}
+You are tasked with creating a coding problem for a contest in {{ language }}. In the interest of raising the quality of the problems, you decide to make the problems involve an open-ended question (PROBLEM) with a buggy code snippet (BUGGY_CODE). The contestants will have to fix the bug and match the reference solution to successfully answer the question. To scale this problem-setting process, you decide to base your problems on pre-existing validated (PROBLEM, REFERENCE_SOLUTION) pairs and generate the buggy starter code (BUGGY_SOLUTION) yourself. The buggy code must follow the following constraints:
+
+1. It must be a modification of the reference solution that introduces only functional, logical and algorithmic bugs.
+
+2. The introduction of small syntax and grammatical errors is also allowed. However, you must try to maintain the surface-level structure of the code as much as possible.
+
+3. The buggy code must not allude to the original problem or the reference solution in any way. The problem statement and the reference solution are provided to you as a part of the input, but you must not use them in your output.
+
+4. The buggy code must not allude to the introduced bugs in any way. Variables, functions, classes, and other identifiers should not be named in a way that suggests the presence of bugs. Similarly, the comments and documentation should not hint at the bugs.
+
+5. The addition of new features or the removal of existing features is out of scope for this task.
+
+6. The introduction of security vulnerabilities, memory leaks, or other non-functional bugs is out of scope for this task.
+
+Below is a validated (PROBLEM, REFERENCE_SOLUTION) pair that you can use to generate the buggy code snippet. The problem is enclosed between the tags [PROBLEM] and [/PROBLEM]. The reference solution is enclosed between the tags [REFERENCE_SOLUTION] and [/REFERENCE_SOLUTION].
+
+
+[PROBLEM]
+
+{{ instruction }}
+
+[/PROBLEM]
+
+
+[REFERENCE_SOLUTION]
+
+```{{ language }}
+{{ solution }}
+```
+
+[/REFERENCE_SOLUTION]
+
+
+Your task is two-fold:
+
+Part A: Develop a buggy code snippet (BUGGY_CODE) that is a modification of the reference solution. The buggy code must follow the constraints mentioned above and be enclosed between the tags [BUGGY_CODE] and [/BUGGY_CODE] as shown below:
+
+
+[BUGGY_CODE]
+
+{{'{{'}}Code with inserted bugs goes here.{{'}}'}}
+
+[/BUGGY_CODE]
+
+
+Part B: Outline and explain the bugs that you have introduced in the buggy code snippet. The explanation must be enclosed between the tags [BUG_EXPLANATION] and [/BUG_EXPLANATION] as shown below:
+
+
+[BUG_EXPLANATION]
+
+{{'{{'}}Explanation of the bugs goes here.{{'}}'}}
+
+[/BUG_EXPLANATION]
+{% endblock %}
