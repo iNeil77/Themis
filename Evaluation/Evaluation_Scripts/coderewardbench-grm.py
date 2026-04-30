@@ -1,5 +1,5 @@
 # Invoked as:
-# CUDA_VISIBLE_DEVICES=0 python coderewardbench-seqcls.py "CodeShield/LibraRM-Inst-1.5B" --output "LibraRM-Inst-Aspect" --use-system-prompts --use-aspect-prompts --batch-size 32 --max-length 4096
+# CUDA_VISIBLE_DEVICES=0 python coderewardbench-seqcls.py "CodeShield/ThemisRM-Inst-1.5B" --output "ThemisRM-Inst-Aspect" --use-system-prompts --use-aspect-prompts --batch-size 32 --max-length 4096
 
 """
 This script evaluates a scalar reward model on the Code RewardBench dataset,

@@ -55,8 +55,8 @@ The end-to-end pipeline has three phases: dataset construction, model training, 
       ┌─────────────────────────────────────────────────────┘
       ▼
   ┌──────────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-  │ 4. Content Retrieval │──▶│ 5. Deduplication │──▶│ 6. Term Filtering│
-  │    (git fetch)       │   │    (MinHash LSH) │   │    (aspect terms)│
+  │ 4. Content Retrieval │──▶│ 5. Deduplication │──▶│ 6. Aspect Filter │
+  │    (git fetch)       │   │    (MinHash LSH) │   │    (ModernBERT)  │
   └──────────────────────┘   └──────────────────┘   └──────────────────┘
                                                             │
       ┌─────────────────────────────────────────────────────┘
@@ -139,9 +139,30 @@ See **[Dataset/README.md](./Dataset/README.md)** for the full pipeline documenta
 
 ## Phase 2: Training
 
-Reward models are trained using the Bradley-Terry preference framework on multi-node GPU clusters. The training script supports FSDP2 distributed training, Liger fused Triton kernels for efficient linear cross-entropy computation, and an optional LM regularisation loss.
+Themis-RM models are trained in two stages using the Bradley-Terry preference framework on multi-node GPU clusters. The training script supports FSDP2 distributed training, Liger fused Triton kernels for efficient linear cross-entropy computation, and an optional LM regularisation loss.
+
+1. **Preference Model Pre-Training (PT):** Trains on [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference) (110k+ general-domain and code retrieval preferences) for 2 epochs to instill common human-inspired notions of preference evaluation such as relevance, helpfulness, and harmlessness.
+2. **Preference Modeling (PM):** Trains on [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference) (350k+ code preference pairs across 5 quality dimensions and 8 programming languages) for 1 epoch to specialize on multi-criteria code scoring.
 
 See **[Training/README.md](./Training/README.md)** for the full training documentation, including container setup, cluster configuration, environment variables, FSDP2 config, all training arguments, launch commands, monitoring, checkpointing, and troubleshooting.
+
+### Training Hyperparameters
+
+| Attribute | PT Stage | PM Stage |
+|---|---|---|
+| Training Dataset | Themis-GeneralPreference | Themis-CodePreference |
+| Peak Learning Rate | 2e-5 | 1e-5 |
+| Terminal Learning Rate | 1e-5 | 5e-7 |
+| LM Regularisation Coefficient (λ) | 0.4 | 0.25 |
+| Reward Magnitude Coefficient (μ) | 0.01 | 0.001 |
+| Scheduler | Cosine (5% warmup) | Cosine (5% warmup) |
+| Weight Decay | 0.1 | 0.1 |
+| Gradient Clipping | 2.0 | 1.5 |
+| Global Batch Size | 1024 | 512 |
+| Sequence Length | 2560 | 4096 |
+| Training Epochs | 2 | 1 |
+| Optimizer | AdamW-Fused (β = {0.9, 0.95}) | AdamW-Fused (β = {0.9, 0.95}) |
+| Precision | bfloat16 | bfloat16 |
 
 ### Key Components
 
@@ -167,9 +188,32 @@ See **[Evaluation/README.md](./Evaluation/README.md)** for the full evaluation d
 | Generative | 4 scripts (cerm, nemotron-genrm, lmunit, r3) | vLLM-based text generation with score parsing |
 | Reranking | `rerank_eval.py` | Reward variance, Hits@K, and Spearman correlation on code completions |
 
+## Key Experimental Findings
+
+Our experiments (detailed in the [paper](https://arxiv.org/abs/xxxx.xxxxx)) investigate four research questions:
+
+- **RQ1 — Multi-criteria code scoring:** Existing RMs are largely unusable for scoring code along non-functional axes (efficiency, security), often degenerating to random scoring. Themis-RM-0.6B outscores multiple >100x larger general-purpose RMs, while Themis-RM-32B sets a clear state-of-the-art across all criteria. Scalar reward modeling is well-suited to reference-free code evaluation — the most competitive existing RMs are all scalar RMs.
+
+- **RQ2 — Minimizing cross-criteria interference:** Both the PT phase and auxiliary training losses (LM regularisation, magnitude penalty) improve performance across the board. Criteria-conditioned system prompts effectively disentangle multi-dimensional preferences, eliminating the need for criteria-specific modules, ensembling, or model merging. Training on functional correctness preferences transfers well to non-functional criteria, and positive transfer between all quality criteria means no single-criterion model matches the full multi-criteria Themis-RM.
+
+- **RQ3 — Cross-lingual transfer:** Training on all eight programming languages yields the best performance, suggesting net-positive cross-lingual transfer. Python RMs transfer better to dynamically typed languages; Java RMs transfer better to statically typed ones. Training on diverse multi-criteria preferences leads to stable multilingual reward modeling with small performance differences across languages.
+
+- **RQ4 — Downstream robustness:** Themis-RM achieves state-of-the-art adversarial robustness on judge-hacking perturbations and matches the best RMs specialized for correctness in listwise re-ranking of code contest solutions — a task proven to predict downstream post-training utility. Scaling trends in downstream robustness are even stronger than in pairwise accuracy.
+
 ## Related Work
 
-**[Distributed Training Tutorial](https://github.com/iNeil77/AWS_DistTraining_Tutorial)** — A companion tutorial by the us that walks through multi-node distributed training of scalar reward models on cloud GPU clusters. Covers cluster provisioning, high-speed networking, container management, and FSDP-based training. Useful as a standalone guide for anyone looking to reproduce the Themis training setup or adapt it to their own reward modelling workloads. Follows a simplified recipe that leverages the Axolotl framework for training reward models with the Bradley-Terry loss.
+**[Distributed Training Tutorial](https://github.com/iNeil77/AWS_DistTraining_Tutorial)** — A companion tutorial by us that walks through multi-node distributed training of scalar reward models on cloud GPU clusters. Covers cluster provisioning, high-speed networking, container management, and FSDP-based training. Useful as a standalone guide for anyone looking to reproduce the Themis training setup or adapt it to their own reward modelling workloads. Follows a simplified recipe that leverages the Axolotl framework for training reward models with the Bradley-Terry loss.
+
+## Citation
+
+```bibtex
+@article{themis2025,
+  title={Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring},
+  author={Paul, Indraneil and Gurevych, Iryna and Glava\v{s}, Goran},
+  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  year={2025}
+}
+```
 
 ## License
 

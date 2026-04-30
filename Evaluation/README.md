@@ -499,7 +499,23 @@ scores = pd.read_parquet("Evaluation_Runs/Themis-RM-8B/scores.parquet")
 print(scores.groupby("aspect")["correct"].mean())
 ```
 
-### 11.3 Comparing Models
+### 11.3 Key Findings
+
+The paper's experimental results across 51 evaluated models reveal the following patterns:
+
+- **Non-functional scoring failure:** Existing RMs are largely unusable for scoring code along non-functional axes (efficiency, security), often degenerating to purely random scoring. Only Themis-RM models display strong performance across all five quality dimensions.
+
+- **Scalar RM superiority:** Generative and reasoning-enabled RMs are unable to leverage inference-time compute effectively for pointwise reference-free code evaluation. The most competitive existing RMs are all scalar RMs.
+
+- **Positive scaling trends:** Within all evaluated model families (including Themis-RM), a strong positive scaling trend is observed for scoring functional correctness.
+
+- **Saturation of existing benchmarks:** Simple, dated datasets like HumanEvalPack are too saturated to serve as a useful indicator of RM scoring ability. Themis-CodeRewardBench exposes weaknesses that existing benchmarks miss, particularly on commit-sourced code and partial correctness discrimination.
+
+- **Math RM transfer:** Math-specialized RMs show above-average performance, confirming positive transfer, but this transfer is limited to judging functional correctness in algorithmic code.
+
+- **Downstream robustness:** Themis-RM achieves state-of-the-art adversarial robustness on judge-hacking perturbations and matches the best correctness-specialized RMs in listwise re-ranking — with even stronger scaling trends in downstream robustness than in pairwise accuracy.
+
+### 11.4 Comparing Models
 
 ```python
 import pandas as pd

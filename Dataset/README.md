@@ -30,7 +30,7 @@ End-to-end guide for building the Themis preference dataset from raw git commits
 5. [Stage 3 — Extension Filtering](#5-stage-3--extension-filtering)
 6. [Stage 4 — Content Retrieval](#6-stage-4--content-retrieval)
 7. [Stage 5 — MinHash Deduplication](#7-stage-5--minhash-deduplication)
-8. [Stage 6 — Term-Based Aspect Filtering](#8-stage-6--term-based-aspect-filtering)
+8. [Stage 6 — Term-Based Aspect Filtering & Commit Classification](#8-stage-6--term-based-aspect-filtering--commit-classification)
 9. [Stage 7 — LLM Scoring & Instruction Synthesis](#9-stage-7--llm-scoring--instruction-synthesis)
 10. [Stage 8 — LLM-as-a-Judge Preference Labelling](#10-stage-8--llm-as-a-judge-preference-labelling)
 11. [Stage 9 — System Prompt Assignment & Training Data Assembly](#11-stage-9--system-prompt-assignment--training-data-assembly)
@@ -81,9 +81,9 @@ BigQuery (github_repos)
             │
             ▼
 ┌───────────────────────────┐
-│ Stage 6: Term Filtering   │  Commit_Mining_Terms/*.list
-│ (hard-coded term presence │  → aspect-labelled commit subsets
-│  in commit message)       │
+│ Stage 6: Aspect Filtering │  Commit_Mining_Terms/*.list
+│ (term seed retrieval +    │  → ModernBERT commit classifiers
+│  ModernBERT classifiers)  │  → aspect-labelled commit subsets
 └───────────┬───────────────┘
             │
             ▼
@@ -387,15 +387,23 @@ The clustering step loads all MinHash signatures and hash tables into memory. RA
 
 ---
 
-## 8. Stage 6 — Term-Based Aspect Filtering
+## 7.5. Pull Request Cross-Referencing (Commit Preferences Only)
+
+Before term filtering, commit data destined for training preference pairs is cross-referenced with GHTorrent pull request data. Only commits that are part of subsequently successfully-merged, non-reverted pull requests are retained. All GitHub commit preference data used for training is sourced no later than **March 2019** and comes from a disjoint set of repositories vis-à-vis the commit data in Themis-CodeRewardBench.
+
+---
+
+## 8. Stage 6 — Term-Based Aspect Filtering & Commit Classification
 
 **Directory:** [`Commit_Mining_Terms/`](./Commit_Mining_Terms/)
 
-Each `.list` file contains one lowercase search term per line. A commit is assigned to an aspect if its `message` or `subject` (lowercased) contains any term from the corresponding list.
+Aspect-specific filtering is a two-step process: (1) term-based retrieval of seed positives, followed by (2) training criteria-specialized [ModernBERT](https://huggingface.co/answerdotai/ModernBERT-base) commit classifiers for high-confidence recall at scale. The term lists stored in this repository serve as the seed retrieval mechanism for step (1).
+
+### 8.1 Step 1: Term-Based Seed Retrieval
+
+Each `.list` file contains one lowercase search term per line, initially generated using frontier open-source LMs and then manually curated. A commit is assigned to an aspect if its `message` or `subject` (lowercased) contains any term from the corresponding list.
 
 The term lists are **minimised**: any term that is a substring of another term in the same list has been removed, since the substring match already covers it. Exact duplicates have also been removed.
-
-### 8.1 Aspect Term Lists
 
 | File | Aspect | Term Count | Example Terms |
 |---|---|---|---|
@@ -405,11 +413,9 @@ The term lists are **minimised**: any term that is a substring of another term i
 | [`sec_term_list.list`](./Commit_Mining_Terms/sec_term_list.list) | Security Hardness | 271 | `"sql injection"`, `"xss"`, `"buffer overflow"`, `"cve"`, `"sanitiz"` |
 | [`readability_term_list.list`](./Commit_Mining_Terms/readability_term_list.list) | Readability & Maintainability | 166 | `"refactor"`, `"dead code"`, `"code smell"`, `"rename"`, `"simplify"` |
 
-### 8.2 Matching Strategy
+**Matching strategy:** Terms are matched as substring containment on the lowercased commit message. Many terms use intentional prefix truncation (e.g. `"fix concurre"`, `"sanitiz"`, `"mem align"`) to capture morphological variants without requiring stemming. Because the lists are minimised, no term is redundant — every term in the list matches something that no other term in the same list already covers.
 
-Terms are matched as substring containment on the lowercased commit message. Many terms use intentional prefix truncation (e.g. `"fix concurre"`, `"sanitiz"`, `"mem align"`) to capture morphological variants without requiring stemming. Because the lists are minimised, no term is redundant — every term in the list matches something that no other term in the same list already covers.
-
-### 8.3 Usage Pattern
+A single commit may match multiple aspects. Downstream stages handle this as multi-labelling.
 
 ```python
 from pathlib import Path
@@ -427,7 +433,13 @@ def has_security_terms(message: str) -> bool:
 security_commits = dataset.filter(lambda ex: has_security_terms(ex["message"]))
 ```
 
-A single commit may match multiple aspects. Downstream stages handle this as multi-labelling.
+### 8.2 Step 2: ModernBERT Commit Classifiers
+
+The term-retrieved commits from Step 1 serve as labelled training data for criteria-specialized [ModernBERT](https://huggingface.co/answerdotai/ModernBERT-base) commit classifiers — one per aspect. These classifiers are trained on the commit message text and used to recall high-confidence aspect-relevant commits from the full deduplicated corpus, including commits whose messages may not contain any of the seed terms but are nonetheless relevant to the criterion.
+
+This two-step approach (term retrieval → classifier training → classifier inference) substantially increases recall over term matching alone, as the classifiers learn to generalise beyond the explicit seed terms to semantic patterns in commit messages.
+
+**Note:** The classifier training code is not included in this repository. The term lists and the pipeline stages above and below this step are sufficient to reproduce the term-based seed retrieval; the classifier step is described here for completeness and to explain how the final aspect-labelled commit subsets in the training data were produced.
 
 ---
 
@@ -717,6 +729,58 @@ dataset = dataset.map(
 
 ---
 
+## 11.4. Training Data Composition
+
+### Themis-GeneralPreference (PT Stage — 110k+ samples)
+
+A mixture of general-domain and code retrieval preferences used during Preference Model Pre-Training (PT) to instill common human-inspired notions of preference evaluation such as relevance, helpfulness, and harmlessness.
+
+| Sub-Dataset | Samples | Description |
+|---|---|---|
+| [CodeR-Pile](https://huggingface.co/datasets/nebula2025/CodeR-Pile) | 41,924 | Code retrieval preferences from code augmentation, exemplar, integration, refinement, simplification, pseudo-code, tutorial, and web query subsets. Chosen from positive document; rejected via Zipfian sampling over hard negatives. |
+| [Skywork-Preference](https://huggingface.co/datasets/Skywork/Skywork-Reward-Preference-80K-v0.2) | 30,146 | Filtered WildGuard, OffsetBias, Magpie, and HelpSteer2 subsets |
+| [Tulu-IF](https://huggingface.co/datasets/allenai/tulu-3-pref-personas-instruction-following) | 13,705 | Instruction-following vs. instruction-violating response pairs |
+| [H4-StackExchange](https://huggingface.co/datasets/HuggingFaceH4/stack-exchange-preferences) | 12,139 | Highly-voted accepted answers vs. well-formed low-scoring answers |
+| [Arena-HumanPreference](https://huggingface.co/datasets/lmarena-ai/arena-human-preference-140k) | 7,068 | Human voting validated preferences from LMArena head-to-head contests |
+| [Prometheus-Preference](https://huggingface.co/datasets/prometheus-eval/Preference-Collection) | 2,864 | Helpfulness and harmlessness instruction clusters |
+| [HelpSteer3](https://huggingface.co/datasets/nvidia/HelpSteer3) | 1,452 | High-margin preference pairs from general and STEM subsets |
+| [Argilla-DPO](https://huggingface.co/datasets/argilla/distilabel-math-preference-dpo) | 1,042 | Math answer stylistic preferences (both responses converge on the same answer) |
+| [Truthy-DPO](https://huggingface.co/datasets/jondurbin/truthy-dpo-v0.1) | 377 | Synthetically labeled truthfulness preferences |
+
+### Themis-CodePreference (PM Stage — 350k+ samples)
+
+Code-domain preferences across five quality dimensions and eight programming languages, used during Preference Modeling (PM).
+
+| Sub-Dataset | Samples | Criteria | Languages |
+|---|---|---|---|
+| Commit-Preference | 126,586 | FC, RE, ME, SH, R&M | C, C#, C++, Go, Java, JS, Python, Ruby |
+| [CodeR-Pile](https://huggingface.co/datasets/nebula2025/CodeR-Pile) | 77,153 | FC | C, C#, C++, Go, Java, JS, Python, Ruby |
+| Bugged-Instruct | 54,969 | FC | C, C#, C++, Go, Java, JS, Python, Ruby |
+| [ProSec](https://huggingface.co/datasets/prosecalign/prosec-mixed-clm7b-inst) | 37,690 | SH | C, C++, Java, JS, Python |
+| [Venus](https://huggingface.co/datasets/Elfsong/Venus) | 21,784 | RE, ME | Python |
+| [CodeNet](https://huggingface.co/datasets/iNeil77/CodeNet) | 16,819 | RE, ME | C, C#, C++, Go, Java, JS, Python, Ruby |
+| [RunBugRun](https://huggingface.co/datasets/ASSERT-KTH/RunBugRun-Final) | 6,931 | FC | Python |
+| [ECCO](https://huggingface.co/datasets/CodeEff/ECCO) | 6,188 | RE | Python |
+| [CodeScaleR](https://huggingface.co/datasets/LARK-Lab/CodeScalerPair-51K) | 2,896 | FC | Python |
+| [Pie4Perf](https://huggingface.co/datasets/iNeil77/pie4perf-Train) | 1,640 | RE | C++ |
+| [Cybernative-DPO](https://huggingface.co/datasets/CyberNative/Code_Vulnerability_Security_DPO) | 1,354 | SH | C#, C++, Go, Java, JS, Python, Ruby |
+
+**Criteria key:** FC = Functional Correctness, RE = Runtime Efficiency, ME = Memory Efficiency, SH = Security Hardness, R&M = Readability & Maintainability.
+
+### Data Filtering Procedure
+
+Both Themis-GeneralPreference and Themis-CodePreference undergo the following filtering steps:
+
+1. **Length filtering:** Samples exceeding 2,560 tokens (PT) or 4,096 tokens (PM) are removed. Code responses with syntax trees shallower than 3 levels deep are discarded.
+
+2. **Language filtering:** Non-English prompts are discarded using the GlotLID language classifier. Prompts with perplexity >1,200 (measured by a KenLM model trained on OSCAR EN) are removed.
+
+3. **Near-deduplication:** MinHash filtering with shingle size 20 and similarity threshold 0.75, applied separately per dataset.
+
+4. **Benchmark decontamination:** Samples whose prompt registers a 13-gram overlap with any prompt in Themis-CodeRewardBench, RewardBench, or RM-Bench are removed.
+
+---
+
 ## 12. Auxiliary: Building & Extending the Repo Allowlists
 
 **Script:** [`Utils/scrape_git_repos.py`](./Utils/scrape_git_repos.py)  
@@ -807,8 +871,8 @@ A standalone harness for evaluating a trained scalar reward model on the Code Re
 ### 13.2 Running
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python inference.py "your-org/LibraRM-Inst-1.5B" \
-  --output "LibraRM-Inst-Aspect" \
+CUDA_VISIBLE_DEVICES=0 python inference.py "your-org/ThemisRM-Inst-1.5B" \
+  --output "ThemisRM-Inst-Aspect" \
   --use-system-prompts \
   --use-aspect-prompts \
   --batch-size 32 \

@@ -15,6 +15,7 @@ End-to-end guide for training a Bradley-Terry scalar reward model on multi-node 
 
 ## Table of Contents
 
+0. [Two-Phase Training Overview](#0-two-phase-training-overview)
 1. [Prerequisites](#1-prerequisites)
 2. [Container Setup](#2-container-setup)
 3. [Cluster & Networking](#3-cluster--networking)
@@ -27,6 +28,54 @@ End-to-end guide for training a Bradley-Terry scalar reward model on multi-node 
 10. [Adapting for a Different Model](#10-adapting-for-a-different-model)
 11. [Inference After Training](#11-inference-after-training)
 12. [Troubleshooting](#12-troubleshooting)
+
+---
+
+## 0. Two-Phase Training Overview
+
+Themis-RM models are trained in two sequential phases using the same Bradley-Terry objective with LM regularisation and reward magnitude penalty:
+
+1. **Preference Model Pre-Training (PT):** Trains on [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference), a 110k+ sample mix of natural language and code retrieval preferences, for 2 epochs. This stage instills general human preference notions (helpfulness, harmlessness, relevance) and mitigates value biases from LM pre-training.
+
+2. **Preference Modeling (PM):** Trains on [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference), a 350k+ sample code preference dataset spanning 5 quality dimensions and 8 programming languages, for 1 epoch. This stage specializes the model for multi-criteria code scoring.
+
+Both phases use criteria-conditioned system prompts: 15% of samples have no system prompt, 60% have an aspect-specific prompt (Helpfulness + Harmlessness + one code criterion), and 25% have the full multi-criteria prompt (all 5 code criteria in random order). This stochastic strategy effectively disentangles multi-dimensional preferences without requiring criteria-specific modules or ensembling.
+
+### Reference Training Configuration
+
+The complete training configuration for all model sizes, as reported in the paper:
+
+| Attribute | PT Stage | PM Stage |
+|---|---|---|
+| Training Dataset | Themis-GeneralPreference | Themis-CodePreference |
+| Criteria Following | True | True |
+| Peak Learning Rate | 2e-5 | 1e-5 |
+| Terminal Learning Rate | 1e-5 | 5e-7 |
+| Behavior Cloning Coefficient (λ) | 0.4 | 0.25 |
+| Reward Centering Coefficient (μ) | 0.01 | 0.001 |
+| Scheduler | Cosine (5% warmup) | Cosine (5% warmup) |
+| Optimizer | AdamW-Fused (β = {0.9, 0.95}, ε = 1e-8) | AdamW-Fused (β = {0.9, 0.95}, ε = 1e-8) |
+| Weight Decay | 0.1 | 0.1 |
+| Gradient Clipping | 2.0 | 1.5 |
+| Gradient Checkpointing | True | True |
+| Sequence Length | 2560 | 4096 |
+| Global Batch Size | 1024 | 512 |
+| Training Epochs | 2 | 1 |
+| Precision | bfloat16 (softmax/allreduce in float32) | bfloat16 (softmax/allreduce in float32) |
+| FSDP | Version 1 (param offload enabled) | Version 1 (param offload enabled) |
+| Flash Attention | v2 (fused RMS norm, QKV, MLP) | v2 (fused RMS norm, QKV, MLP) |
+| Liger Kernels | RoPE, RMS norm, GLU activation | RoPE, RMS norm, GLU activation |
+
+Per-model GPU counts:
+
+| Model | PT GPUs | PM GPUs |
+|---|---|---|
+| Themis-RM-0.6B | 8 | 8 |
+| Themis-RM-1.7B | 8 | 8 |
+| Themis-RM-4B | 16 | 16 |
+| Themis-RM-8B | 32 | 32 |
+| Themis-RM-14B | 32 | 64 |
+| Themis-RM-32B | 64 | 128 |
 
 ---
 
@@ -100,6 +149,7 @@ enroot start --root Themis python3 -c "import torch; print(f'GPUs: {torch.cuda.d
 ### 3.1 Node Topology
 
 For an 8-node job:
+
 - 64 GPUs total (8 per node)
 - Intra-node: NVLink
 - Inter-node: high-speed RDMA networking
@@ -107,22 +157,9 @@ For an 8-node job:
 ### 3.2 Network Configuration
 
 Ensure the network allows:
+
 - All TCP/UDP traffic between nodes in the cluster (for NCCL)
 - RDMA traffic between nodes (if using high-speed networking)
-
-### 3.3 Shared Filesystem Layout
-
-```
-/mnt/fsx/
-  Themis/v1.1/
-    Standalone_Trainer/
-      train_reward_model.py        # Training script
-      fsdp2_config.yaml            # Accelerate config
-      launch_reward_training.sh    # Launch script
-    27B/
-      Logs/                        # Accelerate log output (one dir per rank)
-      Outputs/                     # Checkpoints and final model
-```
 
 ---
 
@@ -258,6 +295,7 @@ The chosen sequence uses a **single forward pass** through the base transformer:
 | `--lambda_mag` | 0.01 | Weight for reward magnitude penalty `(|r_w| + |r_l|)^2`. Prevents unbounded reward growth. |
 
 **Tuning guidance:**
+
 - If reward accuracy converges but the model degrades at generation: increase `lambda_lm`
 - If rewards grow very large (>10) or very negative: increase `lambda_mag`
 - For most runs: `lambda_lm=0.1-0.5`, `lambda_mag=0.005-0.02`
@@ -388,7 +426,7 @@ enroot start --root \
             --save_epochs \
             --logging_steps 10 \
             --report_to wandb \
-            --wandb_project "LibraRM" \
+            --wandb_project "ThemisRM" \
             --wandb_run_name "Qwen3-14B-PMP" \
             --num_proc 16 \
             --seed 42
@@ -418,8 +456,8 @@ enroot start --root \
 
 ### 7.4 NCCL / Torch Environment Variables
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
+| Variable | Purpose |
+|----------|---------|
 | `NCCL_NVLS_ENABLE=0` | Disable NVLink SHARP — can cause hangs on heterogeneous topologies |
 | `NCCL_P2P_LEVEL=NVL` | Use NVLink for intra-node GPU-to-GPU P2P transfers |
 | `NCCL_TIMEOUT=300` | 5-minute timeout for NCCL collectives (increase if checkpointing is slow) |

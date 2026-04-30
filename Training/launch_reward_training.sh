@@ -106,7 +106,7 @@ enroot start --root \
             --save_epochs \
             --logging_steps 10 \
             --report_to wandb \
-            --wandb_project "LibraRM" \
+            --wandb_project "ThemisRM" \
             --wandb_run_name "Qwen3-14B-PMP" \
             --num_proc 16 \
             --seed 42
