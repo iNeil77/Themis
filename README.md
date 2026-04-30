@@ -119,7 +119,9 @@ Themis-RM models achieve best-in-class accuracy on [Themis-CodeRewardBench](http
 
 ## Phase 1: Dataset Construction
 
-The dataset pipeline mines single-file commits from GitHub's BigQuery public dataset, filters them through repository reputation and language allowlists, retrieves file contents via shallow git fetches, deduplicates with MinHash LSH, classifies commits by quality aspect using term matching, scores them with LLM judges, synthesises instructions, and assembles the final preference pairs with stochastic system prompts.
+The dataset pipeline mines single-file commits from GitHub's BigQuery public dataset using a modified version of the commit mining pipeline from [OctoPack](https://arxiv.org/abs/2308.07124) ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)), filters them through repository reputation and language allowlists, retrieves file contents via shallow git fetches, deduplicates with MinHash LSH, classifies commits by quality aspect using term matching and ModernBERT classifiers, scores them with LLM judges, synthesises instructions, and assembles the final preference pairs with stochastic system prompts.
+
+The SQL query restricts to **permissively licensed** repositories only (MIT, Apache-2.0, BSD-2/3-Clause, ISC, CC0-1.0, EPL-1.0, MPL-2.0, Unlicense, AGPL-3.0, LGPL-2.1, Artistic-2.0). The BigQuery GitHub snapshot used contains commits up to **early 2022** — predating the widespread availability of LLM code generation tools — ensuring that all mined code changes represent **genuine human-authored preferences**. This raw pool is subsequently subset by time: training commit data is sourced no later than **March 2019**; benchmark commit data is scoped to **June 2019 – January 2021**, from disjoint repositories.
 
 **9 stages** covering BigQuery extraction, repository and extension filtering, content retrieval, deduplication, aspect-based term filtering, LLM scoring and instruction synthesis, LLM-as-a-judge preference labelling, and training data assembly.
 
@@ -129,7 +131,7 @@ See **[Dataset/README.md](./Dataset/README.md)** for the full pipeline documenta
 
 | Component | Description |
 |---|---|
-| [`consolidated_query.sql`](./Dataset/Commit_Mining_SQL/consolidated_query.sql) | BigQuery SQL extracting single-file, licensed commits with non-trivial messages |
+| [`consolidated_query.sql`](./Dataset/Commit_Mining_SQL/consolidated_query.sql) | BigQuery SQL extracting single-file, licensed commits with non-trivial messages (modified from [OctoPack](https://arxiv.org/abs/2308.07124)) |
 | [`Repos/*.json`](./Dataset/Repos/) | Curated allowlists of ~348k high-reputation repos across 33 languages |
 | [`retrieve_commit_contents.py`](./Dataset/Utils/retrieve_commit_contents.py) | Multi-threaded shallow git fetch of pre/post commit file contents |
 | [`minHash_dedupe_local.py`](./Dataset/Utils/minHash_dedupe_local.py) | MinHash LSH deduplication adapted from BigCode |

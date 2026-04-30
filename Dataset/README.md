@@ -1,6 +1,8 @@
 # Dataset Construction Runbook
 
-End-to-end guide for building the Themis preference dataset from raw git commits. The pipeline mines single-file commits from BigQuery, filters them against a curated allowlist of high-reputation repositories, retrieves their contents from GitHub, deduplicates them, filters by aspect-specific terms, scores them with LLM judges, and synthesises instruction-response preference pairs.
+End-to-end guide for building the Themis preference dataset from raw git commits. The pipeline mines single-file commits from BigQuery using a modified version of the commit mining pipeline from [OctoPack](https://arxiv.org/abs/2308.07124) ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)), filters them against a curated allowlist of high-reputation repositories, retrieves their contents from GitHub, deduplicates them, filters by aspect-specific terms, scores them with LLM judges, and synthesises instruction-response preference pairs.
+
+The SQL query restricts to **permissively licensed** repositories only. The BigQuery GitHub snapshot used contains commits up to **early 2022** — predating the widespread availability of LLM code generation tools — ensuring that all mined code changes represent genuine human-authored preferences. This raw pool is subsequently subset by time for training (before March 2019) and benchmark (June 2019 – January 2021) splits.
 
 **Related files:**
 
@@ -140,7 +142,7 @@ BigQuery (github_repos)
 
 **Script:** [`Commit_Mining_SQL/consolidated_query.sql`](./Commit_Mining_SQL/consolidated_query.sql)
 
-Run this query in the Google BigQuery console or via the `bq` CLI. It extracts single-file commits from the GitHub public dataset.
+Run this query in the Google BigQuery console or via the `bq` CLI. It extracts single-file commits from the GitHub public dataset. The query is a modified version of the BigQuery pipeline from [OctoPack](https://arxiv.org/abs/2308.07124) (Muennighoff et al., 2024), whose [CommitPack](https://huggingface.co/datasets/bigcode/commitpack) dataset pioneered large-scale commit mining from the same BigQuery source. The query restricts to **permissively licensed** repositories and the BigQuery snapshot contains commits up to **early 2022** — predating widespread LLM code generation — guaranteeing that all mined code is human-authored.
 
 ### 3.1 What the Query Does
 
