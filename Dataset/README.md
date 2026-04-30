@@ -4,6 +4,16 @@ End-to-end guide for building the Themis preference dataset from raw git commits
 
 The SQL query restricts to **permissively licensed** repositories only. The BigQuery GitHub snapshot used contains commits up to **early 2022** — predating the widespread availability of LLM code generation tools — ensuring that all mined code changes represent genuine human-authored preferences. This raw pool is subsequently subset by time for training (before March 2019) and benchmark (June 2019 – January 2021) splits.
 
+**Published datasets on HuggingFace:**
+
+| Dataset | Description |
+|---|---|
+| [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits) | Raw mined single-file commits (~12M) — output of stages 1–5 |
+| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Commits from merged PRs (~3.98M, 24 languages) — output of stage 6 (PR cross-referencing) |
+| [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference) | Training dataset for the PM stage (354k preference pairs) — final output |
+| [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference) | Training dataset for the PT stage (110k+ preference pairs) |
+| [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) | Code RM evaluation benchmark (8,866 preference pairs) |
+
 **Related files:**
 
 | Directory / File | Purpose |

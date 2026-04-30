@@ -1,6 +1,6 @@
 # Evaluation Runbook
 
-Evaluation harness for benchmarking reward models on the Code RewardBench (CRB) dataset. The suite supports a wide range of reward model architectures — scalar sequence classifiers, multi-objective MoE models, generative reward models, and more — all evaluated through a unified preference-accuracy protocol. Pre-computed results for 51 evaluated models are stored alongside the scripts.
+Evaluation harness for benchmarking reward models on the [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) (CRB) dataset. The suite supports a wide range of reward model architectures — scalar sequence classifiers, multi-objective MoE models, generative reward models, and more — all evaluated through a unified preference-accuracy protocol. Pre-computed results for 51 evaluated models are stored alongside the scripts.
 
 **Related files:**
 

@@ -117,6 +117,18 @@ Themis-RM models achieve best-in-class accuracy on [Themis-CodeRewardBench](http
 | **[Themis-RM-0.6B](https://huggingface.co/project-themis/Themis-RM-0.6B)** | 79.26 | 83.41 | 49.61 | 63.84 |
 | [Skywork-Reward-V2-0.6B](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-0.6B) | 72.77 | 86.32 | 60.83 | 63.65 |
 
+## Datasets
+
+All datasets are available on HuggingFace:
+
+| Dataset | Description | Samples |
+|---|---|---|
+| [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) | Code RM evaluation benchmark: 5 quality dimensions, 8 languages, 19 source subsets | 8,866 |
+| [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference) | Training data for the PM stage: code preferences across 5 criteria and 8 languages | 354,010 |
+| [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference) | Training data for the PT stage: general-domain and code retrieval preferences | 110,598 |
+| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Single-file commits from merged PRs across 24 languages (intermediate, pre-classification) | ~3.98M |
+| [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits) | Raw mined single-file commits from permissively licensed repos (full unfiltered pool) | ~12M |
+
 ## Phase 1: Dataset Construction
 
 The dataset pipeline mines single-file commits from GitHub's BigQuery public dataset using a modified version of the commit mining pipeline from [OctoPack](https://arxiv.org/abs/2308.07124) ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)), filters them through repository reputation and language allowlists, retrieves file contents via shallow git fetches, deduplicates with MinHash LSH, classifies commits by quality aspect using term matching and ModernBERT classifiers, scores them with LLM judges, synthesises instructions, and assembles the final preference pairs with stochastic system prompts.
