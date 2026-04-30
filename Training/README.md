@@ -100,7 +100,7 @@ Per-model GPU counts:
 
 ## 2. Container Setup
 
-The training environment is packaged as a Docker image containing PyTorch, CUDA, high-speed networking drivers, NCCL, Liger Kernel, and all Python dependencies. See [`Themis.Dockerfile`](./Themis.Dockerfile) for the full build definition.
+The training environment is packaged as a Docker image containing PyTorch, CUDA, high-speed networking drivers, NCCL, Liger Kernel, and all Python dependencies. Pre-built images are available on [Docker Hub (`ineil77/themis`)](https://hub.docker.com/repository/docker/ineil77/themis/general). See [`Themis.Dockerfile`](./Themis.Dockerfile) for the full build definition.
 
 ### 2.1 Building the Image (Optional)
 
