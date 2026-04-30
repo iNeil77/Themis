@@ -70,6 +70,7 @@ Each script evaluates a reward model's ability to prefer the chosen response ove
 ## 2. Prerequisites
 
 **Software:**
+
 - Python 3.10+
 - `torch`, `transformers`, `datasets`, `pandas`, `tqdm`
 - `vllm` (for generative RM scripts only)
@@ -78,10 +79,12 @@ Each script evaluates a reward model's ability to prefer the chosen response ove
 - `scipy`, `numpy` (for `rerank_eval.py`)
 
 **Hardware:**
+
 - GPU with sufficient VRAM for the model under evaluation
 - Multi-GPU setups supported via `device_map="auto"` (scalar RMs) or `--tensor-parallel-size` (vLLM-based scripts)
 
 **Data:**
+
 - CRB dataset: `iNeil77/code-reward-bench` on HuggingFace (default config `"Full"`, split `"Full"`)
 - Reranking dataset: `CodeShield/ccplus-rerank` on HuggingFace (for `rerank_eval.py`)
 
@@ -119,20 +122,25 @@ The Code RewardBench (CRB) dataset contains 8,866 preference pairs spanning 5 qu
 
 | Aspect | Subset | Count | Description |
 |---|---|---|---|
+| | | | |
 | **Functional Correctness** | COMMITPREFS_FUNCTIONAL | 825 | Multi-LLM verified bug-fix commits from GitHub |
 | | HUMANEVAL_PACK | 628 | Manually injected bugs in translated HumanEval solutions |
 | | MBPP_PLUS_FIX_HARD | 37 | LLM generations satisfying most but not all test cases |
 | | MDEVAL | 134 | Manually annotated buggy-fixed pairs inspired by GitHub code |
 | | DEBUG_EVAL | 724 | DebugBench and LiveCodeBench buggy-fixed pairs (LeetCode) |
 | | RUNBUGRUN | 2,430 | Buggy-fixed pairs from CodeNet (AtCoder and Aizu) |
+| | | | |
 | **Runtime Efficiency** | COMMITPREFS_RUNTIME | 238 | Multi-LLM verified runtime-improving commits from GitHub |
 | | PIE_PERF | 460 | Emulator-verified slow-fast solution pairs from CodeNet |
 | | ECCO | 399 | Execution-verified slow-fast solution pairs from CodeNet |
 | | EVALPERF | 212 | LLM completions of varying efficiency to EvalPlus |
+| | | | |
 | **Memory Efficiency** | COMMITPREFS_MEMORY | 252 | Multi-LLM verified memory-improving commits from GitHub |
 | | NOFUNEVAL_MEMORY | 37 | Human-validated memory efficiency-enhancing commits |
+| | | | |
 | **Readability & Maintainability** | COMMITPREFS_READABILITY | 1,371 | Multi-LLM verified code style improvements from GitHub |
 | | NOFUNEVAL_MAINTAIN | 128 | CodeQL-verified maintainability fixes linked to GitHub commits |
+| | | | |
 | **Security Hardness** | COMMITPREFS_SECURITY | 769 | Multi-LLM verified vulnerability fixes from GitHub |
 | | CODEPREFBENCH_SECURITY | 173 | Synthetically fixed CyberSecEval samples using LLMs |
 | | VUL4J | 8 | Human and test validated commits from SAP's Project KB |
@@ -378,6 +386,7 @@ A separate evaluation task that measures a scalar RM's ability to rank code comp
 ### 9.1 Task
 
 Given a coding question with multiple completions (some passing tests, some failing), the script:
+
 1. Scores every completion with the reward model
 2. Reports three metric families:
    - **Reward variance** per question (higher → more discriminative model)
