@@ -115,7 +115,29 @@ The Code RewardBench (CRB) dataset contains 8,866 preference pairs spanning 5 qu
 
 ### 3.3 Source Subsets
 
-19 subsets including: RUNBUGRUN (2,430), COMMITPREFS_READABILITY (1,371), COMMITPREFS_FUNCTIONAL (825), COMMITPREFS_SECURITY (769), DEBUG_EVAL (724), HUMANEVAL_PACK (628), PIE_PERF (460), ECCO (399), COMMITPREFS_MEMORY (252), COMMITPREFS_RUNTIME (238), EVALPERF (212), CODEPREFBENCH_SECURITY (173), MDEVAL (134), NOFUNEVAL_MAINTAIN (128), MBPP_PLUS_FIX_HARD (37), NOFUNEVAL_MEMORY (37), NOFUNEVAL_SECURITY (27), SECBENCH (14), VUL4J (8).
+19 subsets grouped by aspect:
+
+| Aspect | Subset | Count | Description |
+|---|---|---|---|
+| **Functional Correctness** | COMMITPREFS_FUNCTIONAL | 825 | Multi-LLM verified bug-fix commits from GitHub |
+| | HUMANEVAL_PACK | 628 | Manually injected bugs in translated HumanEval solutions |
+| | MBPP_PLUS_FIX_HARD | 37 | LLM generations satisfying most but not all test cases |
+| | MDEVAL | 134 | Manually annotated buggy-fixed pairs inspired by GitHub code |
+| | DEBUG_EVAL | 724 | DebugBench and LiveCodeBench buggy-fixed pairs (LeetCode) |
+| | RUNBUGRUN | 2,430 | Buggy-fixed pairs from CodeNet (AtCoder and Aizu) |
+| **Runtime Efficiency** | COMMITPREFS_RUNTIME | 238 | Multi-LLM verified runtime-improving commits from GitHub |
+| | PIE_PERF | 460 | Emulator-verified slow-fast solution pairs from CodeNet |
+| | ECCO | 399 | Execution-verified slow-fast solution pairs from CodeNet |
+| | EVALPERF | 212 | LLM completions of varying efficiency to EvalPlus |
+| **Memory Efficiency** | COMMITPREFS_MEMORY | 252 | Multi-LLM verified memory-improving commits from GitHub |
+| | NOFUNEVAL_MEMORY | 37 | Human-validated memory efficiency-enhancing commits |
+| **Readability & Maintainability** | COMMITPREFS_READABILITY | 1,371 | Multi-LLM verified code style improvements from GitHub |
+| | NOFUNEVAL_MAINTAIN | 128 | CodeQL-verified maintainability fixes linked to GitHub commits |
+| **Security Hardness** | COMMITPREFS_SECURITY | 769 | Multi-LLM verified vulnerability fixes from GitHub |
+| | CODEPREFBENCH_SECURITY | 173 | Synthetically fixed CyberSecEval samples using LLMs |
+| | VUL4J | 8 | Human and test validated commits from SAP's Project KB |
+| | SECBENCH | 14 | Fused security-fix commit datasets mined from CWEs |
+| | NOFUNEVAL_SECURITY | 27 | Asleep at the Keyboard CoPilot completions triggering CodeQL rules |
 
 ---
 
@@ -149,25 +171,25 @@ The 20 evaluation scripts are organised into four categories based on model arch
 
 | Script | Target Models | Key Distinction |
 |---|---|---|
-| `coderewardbench-seqcls.py` | Themis-RM-*, SkyworkV2-*, CodeScaler-*, FsfairX, Llama-3.1-*-RM-RB2, OffsetBias, URM, Tulu-3, WorldPM, Qwen2.5-Math-RM | Standard `AutoModelForSequenceClassification` — works for any model that exposes a scalar logit |
-| `coderewardbench-armo.py` | ArmoRM-Llama3-8B-v0.1 | Llama + MoE gating network (19 objectives, learned temperature-scaled softmax gating) |
-| `coderewardbench-qrm.py` | QRM-Gemma-2-27B | Gemma2 + quantile regression + MoE gating (5 objectives × 19 quantiles) |
-| `coderewardbench-qrm-llama.py` | QRM-Llama3.1-8B-v2 | Same quantile + gating architecture but on Llama backbone |
-| `coderewardbench-athene.py` | Athene-RM-8B, Athene-RM-70B | Llama + `v_head` linear layer, uses CLS token (ID 128003) for score extraction |
-| `coderewardbench-inform.py` | INF-ORM-Llama3.1-70B | Llama + two-layer MLP score head (Linear → ReLU → Linear) |
-| `coderewardbench-acecode.py` | AceCodeRM-7B, AceCodeRM-32B, AceMath-7B-RM, AceMath-72B-RM | ValueHead on Qwen2 backbone |
-| `coderewardbench-ldl.py` | LDL-Reward-Gemma-2-27B-v0.1 | Gemma2 + multi-output NN for label distribution learning |
-| `coderewardbench-grm.py` | GRM-llama3-8B-sftreg, GRM-llama3.2-3B-sftreg | `trl.PreTrainedModelWrapper` with ValueHead |
-| `coderewardbench-internlm.py` | internlm2-* (1.8B, 7B, 20B variants) | Custom InternLM2 architecture with reward head |
-| `coderewardbench-nemotron.py` | Llama-3.3-Nemotron-70B-Reward | Causal LM; extracts reward from helpfulness logprobs at the final token |
-| `coderewardbench-starling.py` | Starling-RM-34B | Causal LM; custom reward extraction via forward pass on full conversation |
-| `coderewardbench-eurus.py` | Eurus-RM-7b | `AutoModel` with custom reward token pooling |
-| `coderewardbench-ultra.py` | UltraRM-13b | `AutoModel` with custom reward extraction |
-| `coderewardbench-automodel.py` | mistral-7b-gsm8k-code-rm | Generic `AutoModel` fallback |
-| `coderewardbench-cerm.py` | CE-RM-4B | Two-turn generative: criteria generation → evaluation; parses `\boxed{}` scores via vLLM |
-| `coderewardbench-nemotron-genrm.py` | Qwen3-Nemotron-32B-GenRM-Principle | Generative with principle-based prompts; reward from logprobs of " Yes" / " No" tokens |
-| `coderewardbench-lmunit.py` | LMUnit-qwen2.5-72b | Generative with aspect-specific unit tests; parses `{"score": N}` JSON output |
-| `coderewardbench-r3.py` | R3-Qwen3-4B/8B/14B-14k | Rubric-based generative evaluation; parses numerical score from structured output |
+| [`coderewardbench-seqcls.py`](./Evaluation_Scripts/coderewardbench-seqcls.py) | Themis-RM-*, SkyworkV2-*, CodeScaler-*, FsfairX, Llama-3.1-*-RM-RB2, OffsetBias, URM, Tulu-3, WorldPM, Qwen2.5-Math-RM | Standard `AutoModelForSequenceClassification` — works for any model that exposes a scalar logit |
+| [`coderewardbench-armo.py`](./Evaluation_Scripts/coderewardbench-armo.py) | ArmoRM-Llama3-8B-v0.1 | Llama + MoE gating network (19 objectives, learned temperature-scaled softmax gating) |
+| [`coderewardbench-qrm.py`](./Evaluation_Scripts/coderewardbench-qrm.py) | QRM-Gemma-2-27B | Gemma2 + quantile regression + MoE gating (5 objectives × 19 quantiles) |
+| [`coderewardbench-qrm-llama.py`](./Evaluation_Scripts/coderewardbench-qrm-llama.py) | QRM-Llama3.1-8B-v2 | Same quantile + gating architecture but on Llama backbone |
+| [`coderewardbench-athene.py`](./Evaluation_Scripts/coderewardbench-athene.py) | Athene-RM-8B, Athene-RM-70B | Llama + `v_head` linear layer, uses CLS token (ID 128003) for score extraction |
+| [`coderewardbench-inform.py`](./Evaluation_Scripts/coderewardbench-inform.py) | INF-ORM-Llama3.1-70B | Llama + two-layer MLP score head (Linear → ReLU → Linear) |
+| [`coderewardbench-acecode.py`](./Evaluation_Scripts/coderewardbench-acecode.py) | AceCodeRM-7B, AceCodeRM-32B, AceMath-7B-RM, AceMath-72B-RM | ValueHead on Qwen2 backbone |
+| [`coderewardbench-ldl.py`](./Evaluation_Scripts/coderewardbench-ldl.py) | LDL-Reward-Gemma-2-27B-v0.1 | Gemma2 + multi-output NN for label distribution learning |
+| [`coderewardbench-grm.py`](./Evaluation_Scripts/coderewardbench-grm.py) | GRM-llama3-8B-sftreg, GRM-llama3.2-3B-sftreg | `trl.PreTrainedModelWrapper` with ValueHead |
+| [`coderewardbench-internlm.py`](./Evaluation_Scripts/coderewardbench-internlm.py) | internlm2-* (1.8B, 7B, 20B variants) | Custom InternLM2 architecture with reward head |
+| [`coderewardbench-nemotron.py`](./Evaluation_Scripts/coderewardbench-nemotron.py) | Llama-3.3-Nemotron-70B-Reward | Causal LM; extracts reward from helpfulness logprobs at the final token |
+| [`coderewardbench-starling.py`](./Evaluation_Scripts/coderewardbench-starling.py) | Starling-RM-34B | Causal LM; custom reward extraction via forward pass on full conversation |
+| [`coderewardbench-eurus.py`](./Evaluation_Scripts/coderewardbench-eurus.py) | Eurus-RM-7b | `AutoModel` with custom reward token pooling |
+| [`coderewardbench-ultra.py`](./Evaluation_Scripts/coderewardbench-ultra.py) | UltraRM-13b | `AutoModel` with custom reward extraction |
+| [`coderewardbench-automodel.py`](./Evaluation_Scripts/coderewardbench-automodel.py) | mistral-7b-gsm8k-code-rm | Generic `AutoModel` fallback |
+| [`coderewardbench-cerm.py`](./Evaluation_Scripts/coderewardbench-cerm.py) | CE-RM-4B | Two-turn generative: criteria generation → evaluation; parses `\boxed{}` scores via vLLM |
+| [`coderewardbench-nemotron-genrm.py`](./Evaluation_Scripts/coderewardbench-nemotron-genrm.py) | Qwen3-Nemotron-32B-GenRM-Principle | Generative with principle-based prompts; reward from logprobs of " Yes" / " No" tokens |
+| [`coderewardbench-lmunit.py`](./Evaluation_Scripts/coderewardbench-lmunit.py) | LMUnit-qwen2.5-72b | Generative with aspect-specific unit tests; parses `{"score": N}` JSON output |
+| [`coderewardbench-r3.py`](./Evaluation_Scripts/coderewardbench-r3.py) | R3-Qwen3-4B/8B/14B-14k | Rubric-based generative evaluation; parses numerical score from structured output |
 
 ---
 
