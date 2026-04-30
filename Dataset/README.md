@@ -8,8 +8,8 @@ The SQL query restricts to **permissively licensed** repositories only. The BigQ
 
 | Dataset | Description |
 |---|---|
-| [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits) | Raw mined single-file commits (~12M) — output of stages 1–5 |
-| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Commits from merged PRs (~3.98M, 24 languages) — output of stage 6 (PR cross-referencing) |
+| [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits) | Raw mined single-file commits (~28M) — output of stages 1–5 |
+| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Commits from merged PRs (~3M, 24 languages) — output of stage 6 (PR cross-referencing) |
 | [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference) | Training dataset for the PM stage (354k preference pairs) — final output |
 | [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference) | Training dataset for the PT stage (110k+ preference pairs) |
 | [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) | Code RM evaluation benchmark (8,866 preference pairs) |
