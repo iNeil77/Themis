@@ -146,6 +146,8 @@ task_categories:
 - text-classification
 size_categories:
 - 1K<n<10K
+language:
+- en
 ---
 
 <div align="center">

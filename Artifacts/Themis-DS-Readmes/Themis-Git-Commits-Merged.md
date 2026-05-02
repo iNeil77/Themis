@@ -22,7 +22,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 25664270.827623513
     num_examples: 507
+  download_size: 6383845
+  dataset_size: 25664270.827623513
 - config_name: C
   features:
   - name: commit
@@ -45,8 +48,11 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 13034110929.154518
     num_examples: 172736
-- config_name: CSharp
+  download_size: 4953140102
+  dataset_size: 13034110929.154518
+- config_name: C#
   features:
   - name: commit
     dtype: string
@@ -68,8 +74,11 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 5397646765.3076105
     num_examples: 138000
-- config_name: Cpp
+  download_size: 1656363259
+  dataset_size: 5397646765.3076105
+- config_name: C++
   features:
   - name: commit
     dtype: string
@@ -91,7 +100,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 23547757257
     num_examples: 194218
+  download_size: 7569744858
+  dataset_size: 23547757257
 - config_name: Dart
   features:
   - name: commit
@@ -114,7 +126,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 397294625.4988167
     num_examples: 8890
+  download_size: 154161531
+  dataset_size: 397294625.4988167
 - config_name: Erlang
   features:
   - name: commit
@@ -137,7 +152,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 889166050
     num_examples: 15623
+  download_size: 262956120
+  dataset_size: 889166050
 - config_name: Go
   features:
   - name: commit
@@ -160,7 +178,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 13724186600.079618
     num_examples: 189131
+  download_size: 7560506015
+  dataset_size: 13724186600.079618
 - config_name: Groovy
   features:
   - name: commit
@@ -183,7 +204,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 569309862
     num_examples: 16723
+  download_size: 156155250
+  dataset_size: 569309862
 - config_name: Haskell
   features:
   - name: commit
@@ -206,7 +230,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 584392586
     num_examples: 13851
+  download_size: 208126412
+  dataset_size: 584392586
 - config_name: Java
   features:
   - name: commit
@@ -229,7 +256,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 15135951136.42295
     num_examples: 402369
+  download_size: 5020550095
+  dataset_size: 15135951136.42295
 - config_name: JavaScript
   features:
   - name: commit
@@ -252,7 +282,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 36390392763.94772
     num_examples: 694051
+  download_size: 12357643118
+  dataset_size: 36390392763.94772
 - config_name: Julia
   features:
   - name: commit
@@ -275,7 +308,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 99752915.85875197
     num_examples: 2662
+  download_size: 35164706
+  dataset_size: 99752915.85875197
 - config_name: Kotlin
   features:
   - name: commit
@@ -298,7 +334,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 339000058
     num_examples: 16467
+  download_size: 101204442
+  dataset_size: 339000058
 - config_name: PHP
   features:
   - name: commit
@@ -321,7 +360,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 8837629617.411818
     num_examples: 281390
+  download_size: 3345666898
+  dataset_size: 8837629617.411818
 - config_name: Perl
   features:
   - name: commit
@@ -344,7 +386,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 260477378
     num_examples: 4930
+  download_size: 92901210
+  dataset_size: 260477378
 - config_name: PowerShell
   features:
   - name: commit
@@ -367,7 +412,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 553399997.1505141
     num_examples: 16729
+  download_size: 301061644
+  dataset_size: 553399997.1505141
 - config_name: Python
   features:
   - name: commit
@@ -390,7 +438,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 43401708067
     num_examples: 914849
+  download_size: 14393853016
+  dataset_size: 43401708067
 - config_name: R
   features:
   - name: commit
@@ -413,7 +464,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 22395918.040545523
     num_examples: 656
+  download_size: 4801427
+  dataset_size: 22395918.040545523
 - config_name: Ruby
   features:
   - name: commit
@@ -436,7 +490,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 4806098257
     num_examples: 345124
+  download_size: 1555780240
+  dataset_size: 4806098257
 - config_name: Rust
   features:
   - name: commit
@@ -459,7 +516,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 2750630964.173699
     num_examples: 57383
+  download_size: 1072232323
+  dataset_size: 2750630964.173699
 - config_name: Scala
   features:
   - name: commit
@@ -482,7 +542,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 1502090669
     num_examples: 46557
+  download_size: 507218235
+  dataset_size: 1502090669
 - config_name: Shell
   features:
   - name: commit
@@ -505,7 +568,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 2727002433.72094
     num_examples: 95305
+  download_size: 623236489
+  dataset_size: 2727002433.72094
 - config_name: Swift
   features:
   - name: commit
@@ -528,7 +594,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 831556938.5793096
     num_examples: 40271
+  download_size: 345171247
+  dataset_size: 831556938.5793096
 - config_name: TypeScript
   features:
   - name: commit
@@ -551,17 +620,117 @@ dataset_info:
     dtype: string
   splits:
   - name: train
+    num_bytes: 11236698679
     num_examples: 114769
-tags:
-- code
-- github
-- commits
-- multilingual
+  download_size: 3124417123
+  dataset_size: 11236698679
+configs:
+- config_name: Assembly
+  data_files:
+  - split: train
+    path: Assembly/train-*
+- config_name: C
+  data_files:
+  - split: train
+    path: C/train-*
+- config_name: C#
+  data_files:
+  - split: train
+    path: C#/train-*
+- config_name: C++
+  data_files:
+  - split: train
+    path: C++/train-*
+- config_name: Dart
+  data_files:
+  - split: train
+    path: Dart/train-*
+- config_name: Erlang
+  data_files:
+  - split: train
+    path: Erlang/train-*
+- config_name: Go
+  data_files:
+  - split: train
+    path: Go/train-*
+- config_name: Groovy
+  data_files:
+  - split: train
+    path: Groovy/train-*
+- config_name: Haskell
+  data_files:
+  - split: train
+    path: Haskell/train-*
+- config_name: Java
+  data_files:
+  - split: train
+    path: Java/train-*
+- config_name: JavaScript
+  data_files:
+  - split: train
+    path: JavaScript/train-*
+- config_name: Julia
+  data_files:
+  - split: train
+    path: Julia/train-*
+- config_name: Kotlin
+  data_files:
+  - split: train
+    path: Kotlin/train-*
+- config_name: PHP
+  data_files:
+  - split: train
+    path: PHP/train-*
+- config_name: Perl
+  data_files:
+  - split: train
+    path: Perl/train-*
+- config_name: PowerShell
+  data_files:
+  - split: train
+    path: PowerShell/train-*
+- config_name: Python
+  data_files:
+  - split: train
+    path: Python/train-*
+- config_name: R
+  data_files:
+  - split: train
+    path: R/train-*
+- config_name: Ruby
+  data_files:
+  - split: train
+    path: Ruby/train-*
+- config_name: Rust
+  data_files:
+  - split: train
+    path: Rust/train-*
+- config_name: Scala
+  data_files:
+  - split: train
+    path: Scala/train-*
+- config_name: Shell
+  data_files:
+  - split: train
+    path: Shell/train-*
+- config_name: Swift
+  data_files:
+  - split: train
+    path: Swift/train-*
+- config_name: TypeScript
+  data_files:
+  - split: train
+    path: TypeScript/train-*
 license: apache-2.0
 task_categories:
 - text-generation
 language:
+- en
+tags:
 - code
+- multilingual
+- github
+- commits
 size_categories:
 - 1M<n<10M
 ---

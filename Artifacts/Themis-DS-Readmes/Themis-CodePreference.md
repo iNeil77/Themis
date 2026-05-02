@@ -1,4 +1,53 @@
 ---
+dataset_info:
+  features:
+  - name: system
+    dtype: large_string
+  - name: input
+    dtype: large_string
+  - name: chosen
+    dtype: large_string
+  - name: rejected
+    dtype: large_string
+  - name: language
+    dtype:
+      class_label:
+        names:
+          '0': JavaScript
+          '1': Python
+          '2': Ruby
+          '3': C++
+          '4': C
+          '5': Go
+          '6': Java
+          '7': C#
+          '8': NL
+  - name: aspect
+    dtype:
+      class_label:
+        names:
+          '0': Readability and Maintainability
+          '1': Runtime Efficiency
+          '2': Security Hardness
+          '3': Functional Correctness
+          '4': Memory Efficiency
+          '5': Helpfulness
+          '6': Harmlessness
+  - name: source
+    dtype: string
+  - name: idx
+    dtype: string
+  splits:
+  - name: train
+    num_bytes: 3018930512
+    num_examples: 354010
+  download_size: 1027355104
+  dataset_size: 3018930512
+configs:
+- config_name: default
+  data_files:
+  - split: train
+    path: data/train-*
 tags:
 - code
 - reward-model
@@ -12,6 +61,7 @@ language:
 size_categories:
 - 100K<n<1M
 ---
+
 
 <div align="center">
 
@@ -106,7 +156,7 @@ The dataset undergoes thorough cleaning and decontamination:
 | 4 | **Language filtering** | Non-English prompts discarded via GlotLID classifier |
 | 5 | **Perplexity filtering** | Prompts with perplexity > 1200 discarded (KenLM model on OSCAR EN corpus) |
 | 6 | **Near-deduplication** | MinHash filter (shingle size 20, similarity threshold 0.75) |
-| 7 | **Benchmark decontamination** | 13-gram overlap removal against Themis-CodeRewardBench, RewardBench, and RM-Bench |
+| 7 | **Benchmark decontamination** | 13-gram overlap removal against Themis-CodeRewardBench, RewardBench V1, RewardBench V2, JudgeBench, and RM-Bench |
 
 </div>
 

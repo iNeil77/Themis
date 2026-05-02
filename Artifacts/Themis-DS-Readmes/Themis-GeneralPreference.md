@@ -1,15 +1,64 @@
 ---
+dataset_info:
+  features:
+  - name: system
+    dtype: large_string
+  - name: input
+    dtype: large_string
+  - name: chosen
+    dtype: large_string
+  - name: rejected
+    dtype: large_string
+  - name: language
+    dtype:
+      class_label:
+        names:
+          '0': JavaScript
+          '1': Python
+          '2': Ruby
+          '3': C++
+          '4': C
+          '5': Go
+          '6': Java
+          '7': C#
+          '8': NL
+  - name: aspect
+    dtype:
+      class_label:
+        names:
+          '0': Readability and Maintainability
+          '1': Runtime Efficiency
+          '2': Security Hardness
+          '3': Functional Correctness
+          '4': Memory Efficiency
+          '5': Helpfulness
+          '6': Harmlessness
+  - name: source
+    dtype: string
+  - name: idx
+    dtype: string
+  splits:
+  - name: train
+    num_bytes: 581086365
+    num_examples: 110717
+  download_size: 227757856
+  dataset_size: 581086365
+configs:
+- config_name: default
+  data_files:
+  - split: train
+    path: data/train-*
+license: apache-2.0
+size_categories:
+- 100K<n<1M
 tags:
 - reward-model
 - preference
 - multilingual
-license: apache-2.0
 task_categories:
 - text-classification
 language:
 - en
-size_categories:
-- 100K<n<1M
 ---
 
 <div align="center">
@@ -79,7 +128,7 @@ The dataset undergoes thorough cleaning and decontamination:
 | 3 | **Language filtering** | Non-English prompts discarded via GlotLID classifier |
 | 4 | **Perplexity filtering** | Prompts with perplexity > 1,200 discarded (KenLM model on OSCAR EN corpus) |
 | 5 | **Near-deduplication** | MinHash filter (shingle size 20, similarity threshold 0.75) |
-| 6 | **Benchmark decontamination** | 13-gram overlap removal against Themis-CodeRewardBench, RewardBench, and RM-Bench |
+| 6 | **Benchmark decontamination** | 13-gram overlap removal against Themis-CodeRewardBench, RewardBench V1, RewardBench V2, JudgeBench, and RM-Bench |
 
 </div>
 
@@ -128,3 +177,4 @@ This dataset is released under the [Apache 2.0 License](https://www.apache.org/l
   year={2025}
 }
 ```
+
