@@ -1,5 +1,5 @@
 # Invoked as:
-# CUDA_VISIBLE_DEVICES=0 python coderewardbench-seqcls.py "CodeShield/ThemisRM-Inst-1.5B" --output "ThemisRM-Inst-Aspect" --use-system-prompts --use-aspect-prompts --batch-size 32 --max-length 4096
+# CUDA_VISIBLE_DEVICES=0 python coderewardbench-seqcls.py "YOUR_ORG/YOUR_MODEL_NAME" --output "YOUR_OUTPUT_DIR" --use-system-prompts --use-aspect-prompts --batch-size 32 --max-length 4096
 
 """
 This script evaluates a scalar reward model on the Code RewardBench dataset,
@@ -361,7 +361,7 @@ class RewardModelEvaluator:
 
     def evaluate_dataset(
             self,
-            dataset_name="iNeil77/CRB",
+            dataset_name="project-themis/Themis-CodeRewardBench",
             config=None,
             split=None,
             batch_size=8
@@ -594,7 +594,7 @@ def main():
     )
     parser.add_argument(
         "--dataset",
-        default="iNeil77/code-reward-bench",
+        default="project-themis/Themis-CodeRewardBench",
         help="Dataset name"
     )
     parser.add_argument(

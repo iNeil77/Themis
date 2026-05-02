@@ -1,5 +1,5 @@
 # Invoked as:
-# CUDA_VISIBLE_DEVICES=0,1 python rerank_eval.py "CodeShield/Themis-RM-32B" --dataset "CodeShield/ccplus-rerank" --config "python" --output results_py --use-system-prompt --batch-size 8 --max-length 4096
+# CUDA_VISIBLE_DEVICES=0,1 python rerank_eval.py "YOUR_ORG/YOUR_MODEL_NAME" --dataset "YOUR_ORG/YOUR_DATASET_NAME" --config "python" --output results_py --use-system-prompt --batch-size 8 --max-length 4096
 
 """
 Re-ranking metric evaluation for scalar reward models on code-completion datasets.

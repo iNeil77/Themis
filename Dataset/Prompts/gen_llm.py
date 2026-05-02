@@ -280,4 +280,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# python gen_llm.py --input_dataset "CodeShield/Commit-Preference" --split "train" --output_prefix "Judge_Outputs/Commit-Preference" --model "Qwen/Qwen3-30B-A3B-Instruct-2507" --start_index 0 --end_index 8000 --num_responses 8 --num_proc 24 --tensor_parallel_size 2 --seed 77
+# python gen_llm.py --input_dataset "YOUR_ORG/YOUR_DATASET_NAME" --split "train" --output_prefix "Judge_Outputs/YOUR_OUTPUT_PREFIX" --model "YOUR_ORG/YOUR_MODEL_NAME" --start_index 0 --end_index 8000 --num_responses 8 --num_proc 24 --tensor_parallel_size 2 --seed 77

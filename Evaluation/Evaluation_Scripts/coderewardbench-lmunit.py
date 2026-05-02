@@ -109,7 +109,7 @@ class GenerativeRewardModelEvaluator:
                 parse_failures += 1
         return scores, parse_failures
 
-    def evaluate_dataset(self, dataset_name="iNeil77/code-reward-bench", config=None, split=None, batch_size=256):
+    def evaluate_dataset(self, dataset_name="project-themis/Themis-CodeRewardBench", config=None, split=None, batch_size=256):
         print(f"Loading dataset: {dataset_name}")
         if config:
             print(f"Using config: {config} and split: {split}")
@@ -262,7 +262,7 @@ class GenerativeRewardModelEvaluator:
 def main():
     parser = argparse.ArgumentParser(description="Evaluate generative reward model on CRB dataset using vLLM")
     parser.add_argument("model_path", help="Path to the generative reward model")
-    parser.add_argument("--dataset", default="iNeil77/code-reward-bench", help="Dataset name")
+    parser.add_argument("--dataset", default="project-themis/Themis-CodeRewardBench", help="Dataset name")
     parser.add_argument("--config", help="Dataset configuration name")
     parser.add_argument("--split", help="Specific split to evaluate")
     parser.add_argument("--output", required=True, help="Output directory name to save results")

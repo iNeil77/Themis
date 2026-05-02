@@ -85,8 +85,8 @@ Each script evaluates a reward model's ability to prefer the chosen response ove
 
 **Data:**
 
-- CRB dataset: `iNeil77/code-reward-bench` on HuggingFace (default config `"Full"`, split `"Full"`)
-- Reranking dataset: `CodeShield/ccplus-rerank` on HuggingFace (for `rerank_eval.py`)
+- CRB dataset: `project-themis/Themis-CodeRewardBench` on HuggingFace (default config `"Full"`, split `"Full"`)
+- Reranking dataset: `YOUR_ORG/YOUR_RERANK_DATASET` on HuggingFace (for `rerank_eval.py`)
 
 ---
 
@@ -218,7 +218,7 @@ The baseline evaluator for any model loadable via `AutoModelForSequenceClassific
 | Argument | Default | Description |
 |---|---|---|
 | `model_path` | Required (positional) | HuggingFace model ID or local path |
-| `--dataset` | `iNeil77/code-reward-bench` | HuggingFace dataset name |
+| `--dataset` | `project-themis/Themis-CodeRewardBench` | HuggingFace dataset name |
 | `--config` | `None` | Dataset configuration (defaults to `"Full"`) |
 | `--split` | `None` | Dataset split (defaults to `"Full"`) |
 | `--output` | Required | Output directory for `results.json` and `scores.parquet` |
@@ -231,8 +231,8 @@ The baseline evaluator for any model loadable via `AutoModelForSequenceClassific
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python coderewardbench-seqcls.py \
-  "CodeShield/Themis-RM-8B" \
-  --output "Themis-RM-8B" \
+  "YOUR_ORG/YOUR_MODEL_NAME" \
+  --output "YOUR_OUTPUT_DIR" \
   --use-system-prompts \
   --use-aspect-prompts \
   --batch-size 32 \
@@ -398,7 +398,7 @@ Given a coding question with multiple completions (some passing tests, some fail
 | Argument | Default | Description |
 |---|---|---|
 | `model_path` | Required | Scalar RM (uses `AutoModelForSequenceClassification`) |
-| `--dataset` | `CodeShield/ccplus-rerank` | HuggingFace reranking dataset |
+| `--dataset` | `YOUR_ORG/YOUR_RERANK_DATASET` | HuggingFace reranking dataset |
 | `--config` | Required | Language config (e.g. `"python"`) |
 | `--output` | Required | Output directory |
 | `--use-system-prompt` | `False` | Prepend Functional Correctness system prompt |
@@ -409,8 +409,8 @@ Given a coding question with multiple completions (some passing tests, some fail
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 python rerank_eval.py \
-  "CodeShield/Themis-RM-32B" \
-  --dataset "CodeShield/ccplus-rerank" \
+  "YOUR_ORG/YOUR_MODEL_NAME" \
+  --dataset "YOUR_ORG/YOUR_RERANK_DATASET" \
   --config "python" \
   --output results_py \
   --use-system-prompt \

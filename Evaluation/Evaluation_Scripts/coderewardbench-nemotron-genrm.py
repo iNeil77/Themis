@@ -195,7 +195,7 @@ class GenRMEvaluator:
 
     def evaluate_dataset(
             self,
-            dataset_name="iNeil77/CRB",
+            dataset_name="project-themis/Themis-CodeRewardBench",
             config=None,
             split=None):
         """
@@ -433,7 +433,7 @@ def main():
     )
     parser.add_argument(
         "--dataset",
-        default="iNeil77/code-reward-bench",
+        default="project-themis/Themis-CodeRewardBench",
         help="Dataset name"
     )
     parser.add_argument(

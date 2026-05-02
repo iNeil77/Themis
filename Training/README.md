@@ -395,16 +395,16 @@ enroot start --root \
     --env WANDB_API_KEY="${WANDB_API_KEY}" \
     --env WANDB_LOG_MODEL=false \
     Themis accelerate launch \
-        --config_file "/mnt/fsx/Themis/v1.1/Standalone_Trainer/fsdp2_config.yaml" \
-        --log_dir "/mnt/fsx/Themis/v1.1/27B/Logs/" \
+        --config_file "/path/to/fsdp2_config.yaml" \
+        --log_dir "/path/to/logs/" \
         --machine_rank "${MACHINE_RANK}" \
         --main_process_ip "${MASTER_ADDR}" \
         --main_process_port "${MASTER_PORT}" \
         --multi_gpu \
         --rdzv_backend "c10d" \
         --tee 3 \
-        /mnt/fsx/Themis/v1.1/Standalone_Trainer/train_reward_model.py \
-            --model_name_or_path "Qwen/Qwen3-14B" \
+        /path/to/train_reward_model.py \
+            --model_name_or_path "YOUR_ORG/YOUR_BASE_MODEL" \
             --dataset_name "project-themis/Themis-GeneralPreference" \
             --dataset_split "train" \
             --max_length 2560 \
@@ -421,13 +421,13 @@ enroot start --root \
             --min_lr_ratio 0.5 \
             --lambda_lm 0.4 \
             --lambda_mag 0.01 \
-            --output_dir "/mnt/fsx/Themis/v1.1/27B/Outputs/" \
+            --output_dir "/path/to/outputs/" \
             --save_steps 50 \
             --save_epochs \
             --logging_steps 10 \
             --report_to wandb \
-            --wandb_project "ThemisRM" \
-            --wandb_run_name "Qwen3-14B-PMP" \
+            --wandb_project "YOUR_WANDB_PROJECT" \
+            --wandb_run_name "YOUR_RUN_NAME" \
             --num_proc 16 \
             --seed 42
 ```
@@ -498,7 +498,7 @@ If `--report_to wandb` is set, metrics are logged live:
 
 Each rank writes logs to `--log_dir`:
 ```bash
-ls /mnt/fsx/Themis/v1.1/27B/Logs/
+ls /path/to/logs/
 # main_log.txt, rank_0.log, rank_1.log, ...
 ```
 
@@ -519,7 +519,7 @@ If the job hangs:
 ### 9.1 Checkpoint Layout
 
 ```
-/mnt/fsx/Themis/v1.1/27B/Outputs/
+/path/to/outputs/
   checkpoint-50/          # Step-based checkpoints
     config.json
     model.safetensors
@@ -623,7 +623,7 @@ The saved model is a standard HuggingFace `AutoModelForSequenceClassification`. 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
 
-model_path = "/mnt/fsx/Themis/v1.1/27B/Outputs/"
+model_path = "/path/to/outputs/"
 model = AutoModelForSequenceClassification.from_pretrained(
     model_path,
     torch_dtype=torch.bfloat16,

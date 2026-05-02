@@ -427,7 +427,7 @@ class R3RewardModelEvaluator:
 
     def evaluate_dataset(
         self,
-        dataset_name: str = "iNeil77/CRB",
+        dataset_name: str = "project-themis/Themis-CodeRewardBench",
         config: Optional[str] = None,
         split: Optional[str] = None,
         batch_size: int = 32,
@@ -654,7 +654,7 @@ def main():
     )
     parser.add_argument(
         "--dataset",
-        default="iNeil77/code-reward-bench",
+        default="project-themis/Themis-CodeRewardBench",
         help="Dataset name"
     )
     parser.add_argument("--config", help="Dataset configuration name")

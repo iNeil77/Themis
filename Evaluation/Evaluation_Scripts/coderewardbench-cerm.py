@@ -242,7 +242,7 @@ class CERMEvaluator:
 
     def evaluate_dataset(
             self,
-            dataset_name: str = "iNeil77/code-reward-bench",
+            dataset_name: str = "project-themis/Themis-CodeRewardBench",
             config: str | None = None,
             split: str | None = None,
             batch_size: int = 16,
@@ -420,7 +420,7 @@ def main():
         description="Evaluate CE-RM on Code RewardBench using vLLM"
     )
     parser.add_argument("model_path",  help="HuggingFace model ID or local path")
-    parser.add_argument("--dataset",   default="iNeil77/code-reward-bench", help="Dataset name")
+    parser.add_argument("--dataset",   default="project-themis/Themis-CodeRewardBench", help="Dataset name")
     parser.add_argument("--config",    default=None, help="Dataset configuration name")
     parser.add_argument("--split",     default=None, help="Dataset split")
     parser.add_argument("--output",    required=True, help="Output directory for results")
