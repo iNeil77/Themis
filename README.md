@@ -127,7 +127,7 @@ All datasets are available on HuggingFace:
 | [Themis-CodeRewardBench](https://huggingface.co/datasets/project-themis/Themis-CodeRewardBench) | Code RM evaluation benchmark: 5 quality dimensions, 8 languages, 19 source subsets | 8,866 |
 | [Themis-CodePreference](https://huggingface.co/datasets/project-themis/Themis-CodePreference) | Training data for the PM stage: code preferences across 5 criteria and 8 languages | 354,010 |
 | [Themis-GeneralPreference](https://huggingface.co/datasets/project-themis/Themis-GeneralPreference) | Training data for the PT stage: general-domain and code retrieval preferences | 110,598 |
-| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Single-file commits from merged PRs across 24 languages (intermediate, pre-classification) | ~8M |
+| [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged) | Single-file commits from merged PRs across 24 languages (intermediate, pre-classification) | ~3M |
 | [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits) | Raw mined single-file commits from permissively licensed repos (full unfiltered pool) | ~28M |
 
 ## Phase 1: Dataset Construction
