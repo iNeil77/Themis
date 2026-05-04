@@ -18,7 +18,7 @@ size_categories:
 
 # Themis-Git-Commits
 
-[![arXiv](https://img.shields.io/badge/arXiv-xxxx.xxxxx-b31b1b.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.00754-b31b1b.svg)](https://arxiv.org/abs/2605.00754)
 [![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-Themis--RM-yellow)](https://huggingface.co/collections/project-themis/themis-reward-model-collection)
 [![Datasets & Benchmarks](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets%20%26%20Benchmarks-Themis-blue)](https://huggingface.co/collections/project-themis/themis-preference-datasets-and-benchmarks)
 [![GitHub](https://img.shields.io/badge/GitHub-Themis-181717?logo=github)](https://github.com/iNeil77/Themis)
@@ -36,7 +36,7 @@ Each row represents a single commit that changes exactly one file in a repositor
 
 ## Collection Pipeline
 
-The commit mining pipeline is described in detail in the [Themis paper](https://arxiv.org/abs/xxxx.xxxxx) and the [Dataset](https://github.com/iNeil77/Themis/tree/main/Dataset) folder in the GitHub repository. The BigQuery SQL query and scraping infrastructure are modified from the [OctoPack](https://arxiv.org/abs/2308.07124) pipeline ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)); the subsequent filtering, classification, and preference construction stages are original to Themis. At a high level:
+The commit mining pipeline is described in detail in the [Themis paper](https://arxiv.org/abs/2605.00754) and the [Dataset](https://github.com/iNeil77/Themis/tree/main/Dataset) folder in the GitHub repository. The BigQuery SQL query and scraping infrastructure are modified from the [OctoPack](https://arxiv.org/abs/2308.07124) pipeline ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)); the subsequent filtering, classification, and preference construction stages are original to Themis. At a high level:
 
 1. **BigQuery Mining** — A [GoogleSQL query](https://github.com/iNeil77/Themis/blob/main/Dataset/Commit_Mining_SQL/consolidated_query.sql) (modified from [OctoPack](https://arxiv.org/abs/2308.07124)) extracts single-file commits from `bigquery-public-data.github_repos`, filtering for permissive licenses, target programming languages, and non-trivial commit messages.
 
@@ -120,7 +120,7 @@ This dataset is released under the [Apache 2.0 License](https://www.apache.org/l
 @article{themis2025,
   title={Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring},
   author={Paul, Indraneil and Gurevych, Iryna and Glava\v{s}, Goran},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2605.00754},
   year={2025}
 }
 ```

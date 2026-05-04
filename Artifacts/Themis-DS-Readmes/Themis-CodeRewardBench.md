@@ -154,7 +154,7 @@ language:
 
 # Themis-CodeRewardBench
 
-[![arXiv](https://img.shields.io/badge/arXiv-xxxx.xxxxx-b31b1b.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.00754-b31b1b.svg)](https://arxiv.org/abs/2605.00754)
 [![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-Themis--RM-yellow)](https://huggingface.co/collections/project-themis/themis-reward-model-collection)
 [![Datasets & Benchmarks](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets%20%26%20Benchmarks-Themis-blue)](https://huggingface.co/collections/project-themis/themis-preference-datasets-and-benchmarks)
 [![GitHub](https://img.shields.io/badge/GitHub-Themis-181717?logo=github)](https://github.com/iNeil77/Themis)
@@ -307,7 +307,7 @@ The benchmark is composed of 13 constituent datasets grouped by quality dimensio
 
 ## Commit Preference Construction
 
-The "Commit Preference" subsets (Correctness, Runtime, Memory, CodeStyle, Security) are **newly constructed** for this benchmark using the pipeline described in the [Themis paper](https://arxiv.org/abs/xxxx.xxxxx). The commit mining SQL query and scraping infrastructure are modified from the [OctoPack](https://arxiv.org/abs/2308.07124) pipeline ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)); the subsequent filtering, classification, consensus voting, and instruction synthesis stages are original to Themis. The query restricts to **permissively licensed** repositories only, and the BigQuery snapshot contains commits up to **early 2022** — predating widespread LLM code generation — guaranteeing that all mined code represents genuine human-authored preferences.
+The "Commit Preference" subsets (Correctness, Runtime, Memory, CodeStyle, Security) are **newly constructed** for this benchmark using the pipeline described in the [Themis paper](https://arxiv.org/abs/2605.00754). The commit mining SQL query and scraping infrastructure are modified from the [OctoPack](https://arxiv.org/abs/2308.07124) pipeline ([CommitPack](https://huggingface.co/datasets/bigcode/commitpack)); the subsequent filtering, classification, consensus voting, and instruction synthesis stages are original to Themis. The query restricts to **permissively licensed** repositories only, and the BigQuery snapshot contains commits up to **early 2022** — predating widespread LLM code generation — guaranteeing that all mined code represents genuine human-authored preferences.
 
 1. **Single-file commit mining** — Commits mined from **permissively licensed** repositories in the [BigQuery GitHub public dataset](https://console.cloud.google.com/marketplace/product/github/github-repos) using a modified [OctoPack](https://arxiv.org/abs/2308.07124) query. The raw commits are published as [Themis-Git-Commits](https://huggingface.co/datasets/project-themis/git-commits).
 2. **Repository reputation filtering** — Filtered to merged pull requests from reputable repositories (15+ stars, 5+ contributors, 10+ issues) via [GHTorrent](https://ghtorrent.org/). The merged subset is published as [Themis-Git-Commits-Merged](https://huggingface.co/datasets/project-themis/git-commits-merged).
@@ -355,7 +355,7 @@ This dataset is released under the [Apache 2.0 License](https://www.apache.org/l
 @article{themis2025,
   title={Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring},
   author={Paul, Indraneil and Gurevych, Iryna and Glava\v{s}, Goran},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2605.00754},
   year={2025}
 }
 ```

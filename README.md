@@ -2,7 +2,7 @@
 
 # Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring
 
-[![arXiv](https://img.shields.io/badge/arXiv-xxxx.xxxxx-b31b1b.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.00754-b31b1b.svg)](https://arxiv.org/abs/2605.00754)
 [![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-Themis--RM-yellow)](https://huggingface.co/collections/project-themis/themis-reward-model-collection)
 [![Datasets & Benchmarks](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets%20%26%20Benchmarks-Themis-blue)](https://huggingface.co/collections/project-themis/themis-preference-datasets-and-benchmarks)
 [![Docker](https://img.shields.io/badge/Docker-ineil77%2Fthemis-2496ED?logo=docker)](https://hub.docker.com/repository/docker/ineil77/themis/general)
@@ -205,7 +205,7 @@ See **[Evaluation/README.md](./Evaluation/README.md)** for the full evaluation d
 
 ## Key Experimental Findings
 
-Our experiments (detailed in the [paper](https://arxiv.org/abs/xxxx.xxxxx)) investigate four research questions:
+Our experiments (detailed in the [paper](https://arxiv.org/abs/2605.00754)) investigate four research questions:
 
 - **RQ1 — Multi-criteria code scoring:** Existing RMs are largely unusable for scoring code along non-functional axes (efficiency, security), often degenerating to random scoring. Themis-RM-0.6B outscores multiple >100x larger general-purpose RMs, while Themis-RM-32B sets a clear state-of-the-art across all criteria. Scalar reward modeling is well-suited to reference-free code evaluation — the most competitive existing RMs are all scalar RMs.
 
@@ -225,7 +225,7 @@ Our experiments (detailed in the [paper](https://arxiv.org/abs/xxxx.xxxxx)) inve
 @article{themis2025,
   title={Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring},
   author={Paul, Indraneil and Gurevych, Iryna and Glava\v{s}, Goran},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2605.00754},
   year={2025}
 }
 ```

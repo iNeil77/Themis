@@ -67,7 +67,7 @@ size_categories:
 
 # Themis-CodePreference
 
-[![arXiv](https://img.shields.io/badge/arXiv-xxxx.xxxxx-b31b1b.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.00754-b31b1b.svg)](https://arxiv.org/abs/2605.00754)
 [![Models](https://img.shields.io/badge/%F0%9F%A4%97%20Models-Themis--RM-yellow)](https://huggingface.co/collections/project-themis/themis-reward-model-collection)
 [![Datasets & Benchmarks](https://img.shields.io/badge/%F0%9F%A4%97%20Datasets%20%26%20Benchmarks-Themis-blue)](https://huggingface.co/collections/project-themis/themis-preference-datasets-and-benchmarks)
 [![GitHub](https://img.shields.io/badge/GitHub-Themis-181717?logo=github)](https://github.com/iNeil77/Themis)
@@ -201,7 +201,7 @@ This dataset is released under the [Apache 2.0 License](https://www.apache.org/l
 @article{themis2025,
   title={Themis: Training Robust Multilingual Code Reward Models for Flexible Multi-Criteria Scoring},
   author={Paul, Indraneil and Gurevych, Iryna and Glava\v{s}, Goran},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2605.00754},
   year={2025}
 }
 ```
